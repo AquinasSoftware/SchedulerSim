@@ -1,8 +1,8 @@
 #include "processes.h"
 
-process::process(procType typeOfProc, short procID){
+process::process(procName type, short procID){
     ID = procID;
-    type = typeOfProc;
+    procType = type;
     runTime = params.at(type).dRunTime;
     ioCount = params.at(type).dIoCount;
     currentStatus = READY;
@@ -35,6 +35,6 @@ status process::run(){
 // Synchronous function that simulates an IO Call
 void process::ioCall(){
     ioCount--;
-    runTime = params.at(type).dRunTime;
+    runTime = params.at(procType).dRunTime;
     currentStatus = READY;
 }

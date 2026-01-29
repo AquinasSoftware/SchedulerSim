@@ -16,7 +16,7 @@ deconstructor function is called.
 #include <map>
 
 enum status {READY, RUNNING, BLOCKED, DONE};
-enum procType{
+enum procName{
     OS_FUNCTION,
     TEXT_EDITOR,
     MEDIA_PLAYER
@@ -27,7 +27,7 @@ struct defaults{
 
 // Map of Initialized Parameters
 //  Format: Type, {runTime, ioCount}
-const std::map<procType, defaults> params = {
+const std::map<procName, defaults> params = {
     {OS_FUNCTION, {5, 0}},
     {TEXT_EDITOR, {2, 2}},
     {MEDIA_PLAYER, {5, 1}}
@@ -36,13 +36,13 @@ const std::map<procType, defaults> params = {
 class process{
     private:
         short ID;
-        procType type;
+        procName procType;
         short runTime;
         short ioCount;
         status currentStatus;
 
     public:
-        process(procType typeOfProc, short procID);
+        process(procName type, short procID);
 
         short getID();
         status run();
