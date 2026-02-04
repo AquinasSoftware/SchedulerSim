@@ -15,7 +15,7 @@ int main(){
     jobs.push_back(job4);
     jobs.push_back(job5);
 
-    FIFO(jobs);
+    roundRobin(jobs);
 
     return 0;
 }

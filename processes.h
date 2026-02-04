@@ -47,4 +47,5 @@ class process{
         short getID();
         status run();
         void ioCall();
+        short getStatus();
 };

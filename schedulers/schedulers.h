@@ -1,6 +1,7 @@
 #include <iostream> // Temporary until GUI is made
 #include <cstdlib>
 #include <list>
+#include <future>
 #include "../processes.h"
 
 #ifdef _WIN32
@@ -13,4 +14,6 @@
 #define IO_TIME 2
 #define TIME_SLICE 1
 
+void ioCall(std::list<process*> &ioQueue, std::list<process*> &jobs);
 void FIFO(std::list<process*> jobs);
+void roundRobin(std::list<process*> jobs);

@@ -13,6 +13,10 @@ short process::getID(){
     return ID;
 }
 
+short process::getStatus(){
+    return currentStatus;
+}
+
 // Run process and return the process status
 status process::run(){
     if (currentStatus == READY){

@@ -1,7 +1,7 @@
 FLAGS = -lstdc++
 
-SchedulerSim: main.o processes.o schedulers/FIFO.o
-	gcc main.o processes.o schedulers/FIFO.o $(FLAGS) -o SchedulerSim
+SchedulerSim: main.o processes.o schedulers/FIFO.o schedulers/IO.o schedulers/RR.o
+	gcc main.o processes.o schedulers/FIFO.o schedulers/IO.o schedulers/RR.o $(FLAGS) -o SchedulerSim
 	@chmod +x SchedulerSim
 
 main.o: main.cpp
@@ -12,6 +12,12 @@ processes.o: processes.cpp
 
 schedulers/FIFO.o: schedulers/FIFO.cpp
 	gcc -c schedulers/FIFO.cpp -o schedulers/FIFO.o $(FLAGS)
+
+schedulers/IO.o: schedulers/IO.cpp
+	gcc -c schedulers/IO.cpp -o schedulers/IO.o $(FLAGS)
+
+schedulers/RR.o: schedulers/RR.cpp
+	gcc -c schedulers/RR.cpp -o schedulers/RR.o $(FLAGS)
 
 clean:
 	rm SchedulerSim *.o schedulers/*.o
