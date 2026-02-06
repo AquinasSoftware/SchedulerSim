@@ -36,6 +36,11 @@ status process::run(){
     return currentStatus;
 }
 
+// Calculates time left for SJF
+short process::timeLeft(){
+    return runTime + (ioCount * params.at(procType).dRunTime);
+}
+
 // Synchronous function that simulates an IO Call
 void process::ioCall(){
     ioCount--;
