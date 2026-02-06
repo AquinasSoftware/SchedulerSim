@@ -18,3 +18,4 @@ void ioCall(std::list<process*> &ioQueue, std::list<process*> &jobs);
 void FIFO(std::list<process*> jobs);
 void SJF(std::list<process*> jobs);
 void roundRobin(std::list<process*> jobs);
+void SWQ(std::list<process*> jobs);
