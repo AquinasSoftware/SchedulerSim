@@ -9,10 +9,12 @@
 *************************************/
 
 void SWQ(std::list<process*> jobs){
+    float numJobs = jobs.size();
     std::list<process*> ioQueue;
     std::list<process*> window;
     std::future<void> ioThread = std::async(ioCall, std::ref(ioQueue), std::ref(jobs));
-    std::cout << "Running " << jobs.size() << " with SWQ Scheduling" << std::endl;
+    std::cout << "Running " << numJobs << " with SWQ Scheduling" << std::endl;
+    time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
         while(window.size() < WINDOW_SIZE){
             if (jobs.size() > 0){
@@ -43,4 +45,6 @@ void SWQ(std::list<process*> jobs){
             sleep(TIME_SLICE);
         }
     }
+    double totalTime = difftime(time(nullptr), startTime);
+    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
 }

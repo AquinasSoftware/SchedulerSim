@@ -2,11 +2,12 @@
 #include <cstdlib>
 #include <list>
 #include <future>
+#include <ctime>
 #include "../processes.h"
 
 #ifdef _WIN32
     #include <windows.h>
-    #define sleep(x) Sleep(x)
+    #define sleep(x) Sleep((x)*1000)
 #else
     #include <unistd.h>
 #endif

@@ -6,7 +6,9 @@
     to completion, one at a time
 *************************************/
 void FIFO(std::list<process*> jobs){
-    std::cout << "Running " << jobs.size() << " with FIFO Scheduling" << std::endl;
+    float numJobs = jobs.size();
+    std::cout << "Running " << numJobs << " with FIFO Scheduling" << std::endl;
+    time_t startTime = time(nullptr);
     while(jobs.size() > 0){
         switch(jobs.front()->run()){
             case BLOCKED:
@@ -24,4 +26,6 @@ void FIFO(std::list<process*> jobs){
                 sleep(TIME_SLICE);
         }
     }
+    double totalTime = difftime(time(nullptr), startTime);
+    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
 }
