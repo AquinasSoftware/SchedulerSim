@@ -4,7 +4,8 @@ void roundRobin(std::list<process*> jobs){
     float numJobs = jobs.size();
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     std::list<process*> ioQueue;
-    std::future<void> running = std::async(std::launch::async, ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    running.detach();
     time_t startTime = time(nullptr);
     while(jobs.size() > 0){
         while(jobs.front()->getStatus() == BLOCKED){
@@ -25,7 +26,7 @@ void roundRobin(std::list<process*> jobs){
                 break;
         }
         jobs.pop_front();
-        sleep(TIME_SLICE);
+        std::this_thread::sleep_for(TIME_SLICE);
     }
     double totalTime = difftime(time(nullptr), startTime);
     std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;

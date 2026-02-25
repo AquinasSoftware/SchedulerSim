@@ -7,7 +7,7 @@ void ioCall(std::list<process*> &ioQueue, std::list<process*> &jobs){
             std::cout << ioQueue.front()->getID() << ": I/O Access" << std::endl;
             jobs.push_back(ioQueue.front());
             ioQueue.pop_front();
-            sleep(IO_TIME);
+            std::this_thread::sleep_for(IO_TIME);
         }
     }
 }

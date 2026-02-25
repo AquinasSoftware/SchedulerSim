@@ -5,7 +5,8 @@ void SJF(std::list<process*> jobs){
     std::cout << "Running " << numJobs << " with Round SJF Scheduling" << std::endl;
     std::list<process*> ioQueue;
     jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
-    std::future<void> ioThread = std::async(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    running.detach();
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0){
         short sizeMonitor = jobs.size();
@@ -25,7 +26,7 @@ void SJF(std::list<process*> jobs){
                     break;
             }
         }
-        sleep(TIME_SLICE);
+        std::this_thread::sleep_for(TIME_SLICE);
         if (sizeMonitor < jobs.size()){
             jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
         }

@@ -14,7 +14,7 @@ void FIFO(std::list<process*> jobs){
             case BLOCKED:
                 jobs.front()->ioCall();
                 std::cout << jobs.front()->getID() << ": I/O Access" << std::endl;
-                sleep(IO_TIME);
+                std::this_thread::sleep_for(IO_TIME);
                 break;
             case DONE:
                 std::cout << jobs.front()->getID() << ": Done" << std::endl;
@@ -23,7 +23,7 @@ void FIFO(std::list<process*> jobs){
                 break;
             default:
                 std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                sleep(TIME_SLICE);
+                std::this_thread::sleep_for(TIME_SLICE);
         }
     }
     double totalTime = difftime(time(nullptr), startTime);

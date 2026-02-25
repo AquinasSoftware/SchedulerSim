@@ -12,7 +12,8 @@ void SWQ(std::list<process*> jobs){
     float numJobs = jobs.size();
     std::list<process*> ioQueue;
     std::list<process*> window;
-    std::future<void> ioThread = std::async(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    running.detach();
     std::cout << "Running " << numJobs << " with SWQ Scheduling" << std::endl;
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
@@ -42,7 +43,7 @@ void SWQ(std::list<process*> jobs){
                     window.pop_front();
                     break;
             }
-            sleep(TIME_SLICE);
+            std::this_thread::sleep_for(TIME_SLICE);
         }
     }
     double totalTime = difftime(time(nullptr), startTime);
