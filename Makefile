@@ -35,3 +35,8 @@ schedulers/SWQ.o: schedulers/SWQ.cpp
 	
 clean:
 	rm SchedulerSim *.o schedulers/*.o
+
+clean-win:
+	del SchedulerSim.exe 
+	del .\*.o   
+	del schedulers\*.o   

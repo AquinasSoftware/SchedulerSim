@@ -15,7 +15,26 @@ int main(){
     jobs.push_back(job4);
     jobs.push_back(job5);
 
-    SWQ(jobs);
+    std::cout << "Enter Scheduler:" << std::endl;
+    std::cout << "1. FIFO\n2. SJF\n3. RR\n4. SWQ\n\n";
+
+    int choice;
+    std::cin >> choice;
+
+    switch(choice){
+        case 1:
+            FIFO(jobs);
+            break;
+        case 2:
+            SJF(jobs);
+            break;
+        case 3:
+            roundRobin(jobs);
+            break;
+        default:
+            SWQ(jobs);
+            break;
+    }
 
     return 0;
 }

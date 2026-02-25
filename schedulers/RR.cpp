@@ -1,9 +1,11 @@
 #include "schedulers.h"
 
 void roundRobin(std::list<process*> jobs){
-    std::cout << "Running " << jobs.size() << " with Round Robin Scheduling" << std::endl;
+    float numJobs = jobs.size();
+    std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     std::list<process*> ioQueue;
     std::future<void> running = std::async(std::launch::async, ioCall, std::ref(ioQueue), std::ref(jobs));
+    time_t startTime = time(nullptr);
     while(jobs.size() > 0){
         while(jobs.front()->getStatus() == BLOCKED){
             jobs.push_back(jobs.front());
@@ -25,4 +27,6 @@ void roundRobin(std::list<process*> jobs){
         jobs.pop_front();
         sleep(TIME_SLICE);
     }
+    double totalTime = difftime(time(nullptr), startTime);
+    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
 }
