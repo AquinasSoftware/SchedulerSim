@@ -4,6 +4,14 @@ SchedulerSim: main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/I
 	gcc main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o $(FLAGS) -o SchedulerSim
 	@chmod +x SchedulerSim
 
+win64:
+    $(MAKE) clean
+    $(MAKE) CXX=x86_64-w64-mingw32-g++ \
+            CXXFLAGS="`wx-config --host=x86_64-w64-mingw32 --cxxflags`" \
+            LDFLAGS="`wx-config --host=x86_64-w64-mingw32 --libs --static`" \
+            EXEEXT=.exe \
+            TARGET=myapp.exe
+
 main.o: main.cpp
 	gcc -c main.cpp $(FLAGS)
 
