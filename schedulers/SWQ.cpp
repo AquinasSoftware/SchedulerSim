@@ -10,6 +10,8 @@
 
 void SWQ(std::list<process*> jobs){
     float numJobs = jobs.size();
+    double respTimes[(short)numJobs];
+    double turnTimes[(short)numJobs];
     std::list<process*> ioQueue;
     std::list<process*> window;
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
@@ -27,12 +29,16 @@ void SWQ(std::list<process*> jobs){
             }
         }
         if(window.size() > 0){
+            if (!(window.front()->isResponded())){
+                respTimes[window.front()->getID()] = window.front()->respond();
+            }
             switch (window.front()->run()){
                 case BLOCKED:
                     ioQueue.push_back(window.front());
                     window.pop_front();
                     break;
                 case DONE:
+                    turnTimes[window.front()->getID()] = window.front()->turnaround();
                     std::cout << window.front()->getID() << ": Done" << std::endl;
                     delete window.front();
                     window.pop_front();
@@ -46,6 +52,7 @@ void SWQ(std::list<process*> jobs){
             std::this_thread::sleep_for(TIME_SLICE);
         }
     }
-    double totalTime = difftime(time(nullptr), startTime);
-    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
+    double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
+    double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
+    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
 }

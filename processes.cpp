@@ -6,6 +6,7 @@ process::process(procName type, short procID){
     runTime = params.at(type).dRunTime;
     ioCount = params.at(type).dIoCount;
     currentStatus = READY;
+    startTime = time(nullptr);
 }
 
 // Return Process ID
@@ -46,4 +47,22 @@ void process::ioCall(){
     ioCount--;
     runTime = params.at(procType).dRunTime;
     currentStatus = READY;
+}
+
+double process::respond(){
+    if(respTime == 0){
+        respTime = difftime(time(nullptr), startTime);
+    }
+    return respTime;
+}
+
+bool process::isResponded(){
+    return respTime != 0;
+}
+
+double process::turnaround(){
+    if(turnTime == 0){
+        turnTime = difftime(time(nullptr), startTime);
+    }
+    return turnTime;
 }

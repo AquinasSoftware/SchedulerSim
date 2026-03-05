@@ -7,8 +7,9 @@
 *************************************/
 void FIFO(std::list<process*> jobs){
     float numJobs = jobs.size();
+    double respTimes[(short)numJobs];
+    double turnTimes[(short)numJobs];
     std::cout << "Running " << numJobs << " with FIFO Scheduling" << std::endl;
-    time_t startTime = time(nullptr);
     while(jobs.size() > 0){
         switch(jobs.front()->run()){
             case BLOCKED:
@@ -17,15 +18,21 @@ void FIFO(std::list<process*> jobs){
                 std::this_thread::sleep_for(IO_TIME);
                 break;
             case DONE:
+                turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
                 std::cout << jobs.front()->getID() << ": Done" << std::endl;
                 delete(jobs.front());
                 jobs.pop_front();
                 break;
             default:
+                if (!(jobs.front()->isResponded())){
+                    respTimes[jobs.front()->getID()] = jobs.front()->respond();
+                }
                 std::cout << jobs.front()->getID() << ": Running" << std::endl;
                 std::this_thread::sleep_for(TIME_SLICE);
         }
     }
-    double totalTime = difftime(time(nullptr), startTime);
-    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
+
+    double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
+    double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
+    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
 }

@@ -1,6 +1,7 @@
 #include <iostream> // Temporary until GUI is made
 #include <cstdlib>
 #include <list>
+#include <numeric>
 #include <thread>
 #include "../processes.h"
 
