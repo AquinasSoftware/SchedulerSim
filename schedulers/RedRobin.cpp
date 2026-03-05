@@ -24,25 +24,29 @@ void RedRobinRestaurant(std::list<process*> jobs){
   process* firstProc = jobs.front();
 
   while(jobs.size() > 0){
-    switch (jobs.front()->run())
+
+    process* activeJob = jobs.front();
+
+    switch (activeJob->run())
     {
       case RUNNING:
-        std::cout << "Running Job " << jobs.front()->getID() << "." << std::endl;
+        std::cout << "Running Job " << activeJob->getID() << "." << std::endl;
+        std::this_thread::sleep_for(TIME_SLICE);
         break;
       case BLOCKED:
-        std::cout << "Running Job " << jobs.front()->getID() << "." << std::endl;
+        jobs.front()->ioCall();
+        std::cout << "Job " << activeJob->getID() << " IO Call" << std::endl;
+        std::this_thread::sleep_for(IO_TIME);
         break;
      case DONE:
-        std::cout << "Completed Job " << jobs.front()->getID() << "." << std::endl;
+        std::cout << "Completed Job " << activeJob->getID() << "." << std::endl;
         jobs.pop_front();
-        break;
-      
-      default:
         break;
     }
 
-
-
+    
   }
+
+  std::cout << "Finished PRocessing" << std::endl;
 
 }
