@@ -7,8 +7,8 @@ TARGET = SchedulerSim
 
 all: $(TARGET)$(EXEEXT)
 
-$(TARGET)$(EXEEXT): main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o
-	$(CXX) main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o $(FLAGS) $(LDFLAGS) -o $(TARGET)$(EXEEXT)
+$(TARGET)$(EXEEXT): main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o schedulers/RedRobin.o
+	$(CXX) main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o schedulers/RedRobin.o $(FLAGS) $(LDFLAGS) -o $(TARGET)$(EXEEXT)
 	@chmod +x $(TARGET)$(EXEEXT)
 
 win64:
@@ -39,6 +39,9 @@ schedulers/RR.o: schedulers/RR.cpp
 
 schedulers/SWQ.o: schedulers/SWQ.cpp
 	$(CXX) $(CXXFLAGS) -c schedulers/SWQ.cpp -o schedulers/SWQ.o $(FLAGS)
+
+schedulers/RedRobin.o: schedulers/RedRobin.cpp
+	$(CXX) $(CXXFLAGS) -c schedulers/RedRobin.cpp -o schedulers/RedRobin.o $(FLAGS)
 	
 clean:
 	rm -f $(TARGET) *.o schedulers/*.o
