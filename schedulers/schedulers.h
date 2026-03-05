@@ -13,3 +13,4 @@ void FIFO(std::list<process*> jobs);
 void SJF(std::list<process*> jobs);
 void roundRobin(std::list<process*> jobs);
 void SWQ(std::list<process*> jobs);
+void RedRobinRestaurant(std::list<process*> jobs);
