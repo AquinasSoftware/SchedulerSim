@@ -2,7 +2,8 @@
 The Process Class is a template that contains:
     -ID
     -Process Type
-    -Completion Time
+    -Response Time
+    -Turnaround Time
     -IO Request Count
     -Status
 
@@ -14,6 +15,7 @@ counters reach 0, the process is finished and the
 deconstructor function is called.
 ********************************************/
 #include <map>
+#include <chrono>
 
 enum status {READY, RUNNING, BLOCKED, DONE};
 enum procName{
@@ -40,6 +42,9 @@ class process{
         short runTime;
         short ioCount;
         status currentStatus;
+        time_t startTime = 0;
+        time_t respTime = 0;
+        time_t turnTime = 0;
 
     public:
         process(procName type, short procID);
@@ -49,4 +54,8 @@ class process{
         void ioCall();
         short timeLeft();
         short getStatus();
+
+        double respond();
+        bool isResponded();
+        double turnaround();
 };

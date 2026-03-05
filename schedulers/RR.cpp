@@ -2,15 +2,19 @@
 
 void roundRobin(std::list<process*> jobs){
     float numJobs = jobs.size();
+    double respTimes[(short)numJobs];
+    double turnTimes[(short)numJobs];
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     std::list<process*> ioQueue;
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
     running.detach();
-    time_t startTime = time(nullptr);
     while(jobs.size() > 0){
         while(jobs.front()->getStatus() == BLOCKED){
             jobs.push_back(jobs.front());
             jobs.pop_front();
+        }
+        if (!(jobs.front()->isResponded())){
+            respTimes[jobs.front()->getID()] = jobs.front()->respond();
         }
         switch (jobs.front()->run()){
             case RUNNING:
@@ -21,6 +25,7 @@ void roundRobin(std::list<process*> jobs){
                 ioQueue.push_back(jobs.front());
                 break;
             case DONE:
+                turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
                 std::cout << jobs.front()->getID() << ": Done" << std::endl;
                 delete(jobs.front());
                 break;
@@ -28,6 +33,7 @@ void roundRobin(std::list<process*> jobs){
         jobs.pop_front();
         std::this_thread::sleep_for(TIME_SLICE);
     }
-    double totalTime = difftime(time(nullptr), startTime);
-    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
+    double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
+    double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
+    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
 }

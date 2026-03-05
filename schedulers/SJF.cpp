@@ -3,6 +3,8 @@
 void SJF(std::list<process*> jobs){
     float numJobs = jobs.size();
     std::cout << "Running " << numJobs << " with Round SJF Scheduling" << std::endl;
+    double respTimes[(short)numJobs];
+    double turnTimes[(short)numJobs];
     std::list<process*> ioQueue;
     jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
@@ -11,12 +13,16 @@ void SJF(std::list<process*> jobs){
     while(jobs.size() > 0 || ioQueue.size() > 0){
         short sizeMonitor = jobs.size();
         if (sizeMonitor > 0){
+            if (!(jobs.front()->isResponded())){
+                respTimes[jobs.front()->getID()] = jobs.front()->respond();
+            }
             switch (jobs.front()->run()){
                 case BLOCKED:
                     ioQueue.push_back(jobs.front());
                     jobs.pop_front();
                     break;
                 case DONE:
+                    turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
                     std::cout << jobs.front()->getID() << ": Done" << std::endl;
                     delete jobs.front();
                     jobs.pop_front();
@@ -31,6 +37,7 @@ void SJF(std::list<process*> jobs){
             jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
         }
     }
-    double totalTime = difftime(time(nullptr), startTime);
-    std::cout << "Completed all jbs in "  << totalTime << " seconds (" << numJobs/totalTime << "/s)" << std::endl;
+    double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
+    double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
+    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
 }
