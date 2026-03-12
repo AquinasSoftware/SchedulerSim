@@ -2,6 +2,7 @@
 // Compile With g++ wxTest.cpp  $(/usr/bin/wx-config --cxxflags --libs)
 
 #include <wx/wx.h>
+#include "wxMathPlot/mathplot.h"
 
 class MyApp : public wxApp
 {

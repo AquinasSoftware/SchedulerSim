@@ -1,5 +1,47 @@
+#include <wx/wx.h>
 #include "schedulers/schedulers.h"
 
+class GUI : public wxApp {
+    public:
+        bool OnInit() override;
+};
+
+wxIMPLEMENT_APP(GUI);
+
+class windowFrame : public wxFrame {
+    public:
+        windowFrame();
+    
+    private:
+        void OnExit(wxCommandEvent& event);
+        void OnAbout(wxCommandEvent& event);
+};
+
+enum
+{
+    ID_Hello = 1
+};
+
+bool GUI::OnInit()
+{
+    windowFrame *frame = new windowFrame();
+    frame->Show(true);
+    return true;
+}
+
+windowFrame::windowFrame()
+    : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator")
+{
+ 
+    Bind(wxEVT_MENU, &windowFrame::OnExit, this, wxID_EXIT);
+}
+
+void windowFrame::OnExit(wxCommandEvent& event)
+{
+    Close(true);
+}
+
+/*
 // Testing Function until GUI is added
 int main(){
     std::list<process*> jobs;
@@ -41,3 +83,4 @@ int main(){
 
     return 0;
 }
+    */

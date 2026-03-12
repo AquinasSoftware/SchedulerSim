@@ -47,6 +47,6 @@ void RedRobinRestaurant(std::list<process*> jobs){
     
   }
 
-  std::cout << "Finished PRocessing" << std::endl;
+  std::cout << "Finished Processing" << std::endl;
 
 }
