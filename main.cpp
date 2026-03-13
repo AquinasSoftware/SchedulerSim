@@ -1,4 +1,7 @@
 #include <wx/wx.h>
+#include <wx/notebook.h>
+#include <wx/panel.h>
+#include <wx/listctrl.h>
 #include "schedulers/schedulers.h"
 
 class GUI : public wxApp {
@@ -14,7 +17,6 @@ class windowFrame : public wxFrame {
     
     private:
         void OnExit(wxCommandEvent& event);
-        void OnAbout(wxCommandEvent& event);
 };
 
 enum
@@ -32,8 +34,36 @@ bool GUI::OnInit()
 windowFrame::windowFrame()
     : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator")
 {
- 
     Bind(wxEVT_MENU, &windowFrame::OnExit, this, wxID_EXIT);
+
+    wxNotebook* notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP);
+
+    wxPanel* setupPage = new wxPanel(notebook, wxID_ANY);
+    wxBoxSizer *setupSkeleton = new wxBoxSizer(wxVERTICAL);
+
+    wxStaticText* selectionLbl = new wxStaticText(setupPage, wxID_ANY, "Step 1: Create a Process Queue:", wxPoint(10, 10));
+    selectionLbl->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    setupSkeleton->Add(selectionLbl, 0, wxALL, 10);
+
+    wxBoxSizer *step1Skeleton = new wxBoxSizer(wxHORIZONTAL);
+    wxListView* taskList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(300, 300), wxLC_REPORT);
+    taskList->InsertColumn(0, "Process Type");
+    taskList->InsertColumn(1, "Speed");
+    taskList->SetColumnWidth(0, 150);
+    taskList->SetColumnWidth(1, 150);
+    step1Skeleton->Add(taskList, 0, wxLEFT, 10);
+
+    wxListView* taskQueue = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(250, 300), wxLC_REPORT);
+    taskQueue->InsertColumn(0, "Process ID");
+    taskQueue->InsertColumn(1, "Type");
+    taskQueue->SetColumnWidth(0, 100);
+    taskQueue->SetColumnWidth(1, 150);
+    step1Skeleton->Add(taskQueue, 0, wxRIGHT, 10);
+
+    setupSkeleton->Add(step1Skeleton, 0, wxALL, 10);
+    setupPage->SetSizer(setupSkeleton);
+    notebook->AddPage(setupPage, "Setup");
+    windowFrame::SetMinSize(wxSize(750, 720));
 }
 
 void windowFrame::OnExit(wxCommandEvent& event)
