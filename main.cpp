@@ -1,8 +1,13 @@
+#include <iostream>
 #include <wx/wx.h>
 #include <wx/notebook.h>
 #include <wx/panel.h>
 #include <wx/listctrl.h>
+#include <wx/statline.h>
+#include "descriptions.h"
 #include "schedulers/schedulers.h"
+
+void devTest();
 
 class GUI : public wxApp {
     public:
@@ -26,14 +31,26 @@ enum
 
 bool GUI::OnInit()
 {
+    // If dev flag is set, run cmd testing function
+    for (int i = 1; i < argc; i++){
+        wxString arg(argv[i]);
+        if (arg == "-dev" || arg == "--dev"){
+            devTest();
+            return false;
+        }
+    }
+
+    // Else, run the GUI
     windowFrame *frame = new windowFrame();
     frame->Show(true);
     return true;
 }
 
 windowFrame::windowFrame()
-    : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator")
-{
+    : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator", 
+        wxDefaultPosition, wxSize(960, 720),
+        wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)){
+
     Bind(wxEVT_MENU, &windowFrame::OnExit, this, wxID_EXIT);
 
     wxNotebook* notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP);
@@ -41,29 +58,56 @@ windowFrame::windowFrame()
     wxPanel* setupPage = new wxPanel(notebook, wxID_ANY);
     wxBoxSizer *setupSkeleton = new wxBoxSizer(wxVERTICAL);
 
-    wxStaticText* selectionLbl = new wxStaticText(setupPage, wxID_ANY, "Step 1: Create a Process Queue:", wxPoint(10, 10));
-    selectionLbl->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    setupSkeleton->Add(selectionLbl, 0, wxALL, 10);
+// Step 1: Process Queue Creation
+    wxStaticText* step1Lbl = new wxStaticText(setupPage, wxID_ANY, "Step 1: Create a Process Queue", wxPoint(10, 10));
+    step1Lbl->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    setupSkeleton->Add(step1Lbl, 0, wxALL, 10);
 
     wxBoxSizer *step1Skeleton = new wxBoxSizer(wxHORIZONTAL);
-    wxListView* taskList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(300, 300), wxLC_REPORT);
+    wxListView* taskList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(200, 250), wxLC_REPORT);
     taskList->InsertColumn(0, "Process Type");
-    taskList->InsertColumn(1, "Speed");
-    taskList->SetColumnWidth(0, 150);
-    taskList->SetColumnWidth(1, 150);
+    taskList->SetColumnWidth(0, 200);
     step1Skeleton->Add(taskList, 0, wxLEFT, 10);
 
-    wxListView* taskQueue = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(250, 300), wxLC_REPORT);
+    wxBoxSizer *taskButtons = new wxBoxSizer(wxVERTICAL);
+    wxButton* addTaskBtn = new wxButton(setupPage, wxID_ANY, "Add");
+    wxButton* removeTaskBtn = new wxButton(setupPage, wxID_ANY, "Remove");
+    wxButton* clearTasksBtn = new wxButton(setupPage, wxID_ANY, "Clear All");
+    taskButtons->Add(addTaskBtn, 0, wxALL, 5);
+    taskButtons->Add(removeTaskBtn, 0, wxALL, 5);
+    taskButtons->Add(clearTasksBtn, 0, wxALL, 5);
+    step1Skeleton->Add(taskButtons, 0, wxALL | wxALIGN_CENTER_VERTICAL, 10);
+
+    wxListView* taskQueue = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(250, 250), wxLC_REPORT);
     taskQueue->InsertColumn(0, "Process ID");
     taskQueue->InsertColumn(1, "Type");
     taskQueue->SetColumnWidth(0, 100);
     taskQueue->SetColumnWidth(1, 150);
     step1Skeleton->Add(taskQueue, 0, wxRIGHT, 10);
 
-    setupSkeleton->Add(step1Skeleton, 0, wxALL, 10);
+    setupSkeleton->Add(step1Skeleton, 0, wxALIGN_CENTER_HORIZONTAL, 10);
+
+    wxStaticLine* divider = new wxStaticLine(setupPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    setupSkeleton->Add(divider, 0, wxEXPAND | wxALL, 5);
+
+// Step 2: Scheduler Selection
+    wxStaticText* step2Lbl = new wxStaticText(setupPage, wxID_ANY, "Step 2: Select a Scheduler", wxPoint(10, 10));
+    step2Lbl->SetFont(wxFont(16, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    setupSkeleton->Add(step2Lbl, 0, wxALL, 10);
+
+    wxBoxSizer *step2Skeleton = new wxBoxSizer(wxHORIZONTAL);
+    wxListView* schedulerList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(200, 250), wxLC_REPORT);
+    schedulerList->InsertColumn(0, "Scheduler");
+    schedulerList->SetColumnWidth(0, 200);
+    step2Skeleton->Add(schedulerList, 0, wxALL | wxEXPAND, 10);
+
+    wxTextCtrl* schedulerDesc = new wxTextCtrl(setupPage, wxID_ANY, "", wxDefaultPosition, wxSize(400, 250), wxTE_MULTILINE | wxTE_READONLY);   
+    step2Skeleton->Add(schedulerDesc, 1, wxALL| wxEXPAND, 10);
+
+    setupSkeleton->Add(step2Skeleton, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 10);
+
     setupPage->SetSizer(setupSkeleton);
     notebook->AddPage(setupPage, "Setup");
-    windowFrame::SetMinSize(wxSize(750, 720));
 }
 
 void windowFrame::OnExit(wxCommandEvent& event)
@@ -71,9 +115,9 @@ void windowFrame::OnExit(wxCommandEvent& event)
     Close(true);
 }
 
-/*
-// Testing Function until GUI is added
-int main(){
+
+// CMD Testing Function
+void devTest(){
     std::list<process*> jobs;
     process *job1 = new process(OS_FUNCTION, 0);
     process *job2 = new process(TEXT_EDITOR, 1);
@@ -110,7 +154,4 @@ int main(){
             SWQ(jobs);
             break;
     }
-
-    return 0;
 }
-    */
