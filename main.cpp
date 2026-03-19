@@ -6,6 +6,7 @@
 #include <wx/statline.h>
 #include "descriptions.h"
 #include "schedulers/schedulers.h"
+#include "dependencies/mathplot.h"
 
 void devTest();
 
@@ -48,7 +49,7 @@ bool GUI::OnInit()
 
 windowFrame::windowFrame()
     : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator", 
-        wxDefaultPosition, wxSize(960, 720),
+        wxDefaultPosition, wxSize(800, 720),
         wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)){
 
     Bind(wxEVT_MENU, &windowFrame::OnExit, this, wxID_EXIT);
@@ -108,6 +109,35 @@ windowFrame::windowFrame()
 
     setupPage->SetSizer(setupSkeleton);
     notebook->AddPage(setupPage, "Setup");
+
+    wxPanel* simuPage = new wxPanel(notebook, wxID_ANY);
+    wxBoxSizer *simuSkeleton = new wxBoxSizer(wxVERTICAL);
+
+    wxBoxSizer *controlButtons = new wxBoxSizer(wxHORIZONTAL);
+    wxButton* startBtn = new wxButton(simuPage, wxID_ANY, "Start");
+    wxButton* resetBtn = new wxButton(simuPage, wxID_ANY, "Reset");
+    controlButtons->Add(startBtn, 0, wxALL, 5);
+    controlButtons->Add(resetBtn, 0, wxALL, 5);
+    simuSkeleton->Add(controlButtons, 0, wxALL, 5);
+
+// Graph
+    mpWindow* graph = new mpWindow(simuPage, wxID_ANY, wxDefaultPosition, wxSize(750, 400));
+    
+    mpLayer* axisX = new mpScaleX("Simulated Time", mpALIGN_BOTTOM, true);
+    mpLayer* axisY = new mpScaleY("Average Time", mpALIGN_LEFT, true);
+    graph->AddLayer(axisX);
+    graph->AddLayer(axisY);
+    graph->SetScaleX(10);
+    graph->SetPosX(0);
+    graph->SetScaleY(10, 0);
+    
+    simuSkeleton->Add(graph, 1, wxALL | wxEXPAND, 10);
+
+    wxTextCtrl* simuOutput = new wxTextCtrl(simuPage, wxID_ANY, "", wxDefaultPosition, wxSize(780, 200), wxTE_MULTILINE | wxTE_READONLY);   
+    simuSkeleton->Add(simuOutput, 0, wxALL | wxEXPAND, 10);
+
+    simuPage->SetSizer(simuSkeleton);
+    notebook->AddPage(simuPage, "Simulation");
 }
 
 void windowFrame::OnExit(wxCommandEvent& event)
