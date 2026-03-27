@@ -18,32 +18,42 @@ void RedRobinRestaurant(std::list<process*> jobs){
   std::cout << "Running " << numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
   time_t starttime = time(nullptr);
 
-  const int maxCycles = 10;
+  const int maxCycles = 3;
   int firstProcCycles = 1;
 
   process* firstProc = jobs.front();
 
   while(jobs.size() > 0){
 
-    process* activeJob = jobs.front();
-
-    switch (activeJob->run())
+    switch (jobs.front()->run())
     {
       case RUNNING:
-        std::cout << "Running Job " << activeJob->getID() << "." << std::endl;
+        std::cout << "Running Job " << jobs.front()->getID() << "." << std::endl;
         std::this_thread::sleep_for(TIME_SLICE);
         break;
       case BLOCKED:
         jobs.front()->ioCall();
-        std::cout << "Job " << activeJob->getID() << " IO Call" << std::endl;
+        std::cout << "Job " << jobs.front()->getID() << " IO Call" << std::endl;
         std::this_thread::sleep_for(IO_TIME);
         break;
      case DONE:
-        std::cout << "Completed Job " << activeJob->getID() << "." << std::endl;
+        std::cout << "Completed Job " << jobs.front()->getID() << "." << std::endl;
         jobs.pop_front();
+        if (jobs.size() > 0){
+          firstProc = jobs.front();
+          std::cout << "The first proc is now " << firstProc->getID() << std::endl;
+        }
+
         break;
     }
 
+    if (jobs.front() == firstProc && firstProcCycles < maxCycles){
+      firstProcCycles++;
+    } else {
+      jobs.push_back(jobs.front());
+      jobs.pop_front();
+      firstProcCycles = 0;
+    }
     
   }
 
