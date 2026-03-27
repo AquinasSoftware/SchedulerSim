@@ -24,8 +24,8 @@ const char DR_DESC[219] =
 "linear queue. The shorter processes are then run in a rotation. "
 "This approach maximizes the average response and turnaround time.";
 
-const char SWQ_DESC[278] =
-"Smart Window Queue (SWQ):\n]n"
+const char SWQ_DESC[277] =
+"Smart Window Queue (SWQ):\n\n"
 "Processes are put in a linear queue in the order they were received. "
 "The first 3 are then executed in a rotation until one is complete or "
 "issues an I/O instruction. This approach emphasises fairness and "
