@@ -18,8 +18,8 @@ void RedRobinRestaurant(std::list<process*> jobs){
   std::cout << "Running " << numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
   time_t starttime = time(nullptr);
 
-  const int maxCycles = 3;
-  int firstProcCycles = 1;
+  const int maxCycles = 2;
+  int firstProcCycles = 0;
 
   process* firstProc = jobs.front();
 
@@ -41,12 +41,10 @@ void RedRobinRestaurant(std::list<process*> jobs){
         jobs.pop_front();
         if (jobs.size() > 0){
           firstProc = jobs.front();
-          std::cout << "The first proc is now " << firstProc->getID() << std::endl;
         }
-
         break;
     }
-
+  
     if (jobs.front() == firstProc && firstProcCycles < maxCycles){
       firstProcCycles++;
     } else {
