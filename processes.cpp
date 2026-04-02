@@ -14,6 +14,23 @@ short process::getID(){
     return ID;
 }
 
+void process::setID(short newID){
+    ID = newID;
+}
+
+const char* process::getType(){
+    switch (procType){
+        case OS_FUNCTION:
+            return "OS Function";
+        case TEXT_EDITOR:
+            return "Text Editor";
+        case MEDIA_PLAYER:
+            return "Media Player";
+        default:
+            return "Unknown";
+    }
+}
+
 short process::getStatus(){
     return currentStatus;
 }

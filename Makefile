@@ -12,7 +12,7 @@ MP_INCLUDE    = -I./dependencies
 MP_STATIC_LIB = ./dependencies/libwxmathplot_static.a  
 all: $(TARGET)
 
-$(TARGET): main.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o schedulers/RedRobin.o
+$(TARGET): main.o windowFunctions.o processes.o schedulers/FIFO.o schedulers/SJF.o schedulers/IO.o schedulers/RR.o schedulers/SWQ.o schedulers/RedRobin.o
 	$(CXX) $^ $(MP_STATIC_LIB) $(LDFLAGS) $(FLAGS) -o $@ $(WXLIBS) -s
 
 win64:
@@ -51,6 +51,9 @@ win64:
 
 main.o: main.cpp
 	$(CXX) -x c++ $(CXXFLAGS) $(MP_INCLUDE) -c main.cpp $(WXFLAGS)
+
+windowFunctions.o: windowFunctions.cpp
+	$(CXX) -x c++ $(CXXFLAGS) $(MP_INCLUDE) -c windowFunctions.cpp $(WXFLAGS)
 
 processes.o: processes.cpp
 	$(CXX) -x c++ $(CXXFLAGS) $(MP_INCLUDE) -c processes.cpp $(WXFLAGS)

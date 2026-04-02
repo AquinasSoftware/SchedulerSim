@@ -50,6 +50,8 @@ class process{
         process(procName type, short procID);
 
         short getID();
+        void setID(short newID);
+        const char* getType();
         status run();
         void ioCall();
         short timeLeft();
