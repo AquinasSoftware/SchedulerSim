@@ -2,6 +2,12 @@
 std::list<process*> jobs;
 wxListView* taskList;
 wxListView* taskQueue;
+wxListView* schedulerList;
+wxTextCtrl* schedulerDesc;
+wxPanel* simuPage;
+wxButton* startBtn;
+mpWindow* graph;
+wxTextCtrl* simuOutput;
 
 class GUI : public wxApp {
     public:
@@ -96,7 +102,7 @@ windowFrame::windowFrame()
     setupSkeleton->Add(step2Lbl, 0, wxALL, 10);
 
     wxBoxSizer *step2Skeleton = new wxBoxSizer(wxHORIZONTAL);
-    wxListView* schedulerList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(200, 250), wxLC_REPORT | wxLC_SINGLE_SEL);
+    schedulerList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(200, 250), wxLC_REPORT | wxLC_SINGLE_SEL);
     schedulerList->InsertColumn(0, "Scheduler");
     schedulerList->SetColumnWidth(0, 200);
     schedulerList->InsertItem(0, "First In First Out");
@@ -107,7 +113,7 @@ windowFrame::windowFrame()
 
     step2Skeleton->Add(schedulerList, 0, wxALL | wxEXPAND, 10);
 
-    wxTextCtrl* schedulerDesc = new wxTextCtrl(setupPage, wxID_ANY, "", wxDefaultPosition, wxSize(400, 250), wxTE_MULTILINE | wxTE_READONLY);   
+    schedulerDesc = new wxTextCtrl(setupPage, wxID_ANY, "", wxDefaultPosition, wxSize(400, 250), wxTE_MULTILINE | wxTE_READONLY);   
     schedulerDesc->SetFont(wxFont(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     schedulerDesc->SetMargins(10, 5);
     step2Skeleton->Add(schedulerDesc, 1, wxALL| wxEXPAND, 10);
@@ -117,18 +123,19 @@ windowFrame::windowFrame()
     setupPage->SetSizer(setupSkeleton);
     notebook->AddPage(setupPage, "Setup");
 
-    wxPanel* simuPage = new wxPanel(notebook, wxID_ANY);
+    simuPage = new wxPanel(notebook, wxID_ANY);
     wxBoxSizer *simuSkeleton = new wxBoxSizer(wxVERTICAL);
 
     wxBoxSizer *controlButtons = new wxBoxSizer(wxHORIZONTAL);
-    wxButton* startBtn = new wxButton(simuPage, wxID_ANY, "Start");
+    startBtn = new wxButton(simuPage, wxID_ANY, "Start");
+    Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ startSimulation(); }, startBtn->GetId());
     wxButton* resetBtn = new wxButton(simuPage, wxID_ANY, "Reset");
     controlButtons->Add(startBtn, 0, wxALL, 5);
     controlButtons->Add(resetBtn, 0, wxALL, 5);
     simuSkeleton->Add(controlButtons, 0, wxALL, 5);
 
 // Graph
-    mpWindow* graph = new mpWindow(simuPage, wxID_ANY, wxDefaultPosition, wxSize(750, 400));
+    graph = new mpWindow(simuPage, wxID_ANY, wxDefaultPosition, wxSize(750, 400));
     
     mpLayer* axisX = new mpScaleX("Simulated Time", mpALIGN_BOTTOM, true);
     mpLayer* axisY = new mpScaleY("Average Time", mpALIGN_LEFT, true);
@@ -140,45 +147,16 @@ windowFrame::windowFrame()
     graph->SetColourTheme(wxColour(0xFF, 0xFF, 0xFF, 0xCC), *wxBLACK, *wxBLACK);
     simuSkeleton->Add(graph, 1, wxALL | wxEXPAND, 10);
 
-    wxTextCtrl* simuOutput = new wxTextCtrl(simuPage, wxID_ANY, "", wxDefaultPosition, wxSize(780, 200), wxTE_MULTILINE | wxTE_READONLY);   
+    simuOutput = new wxTextCtrl(simuPage, wxID_ANY, "", wxDefaultPosition, wxSize(780, 200), wxTE_MULTILINE | wxTE_READONLY);   
     simuOutput->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     simuOutput->SetMargins(10, 5);
-    simuOutput->SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF, 0xD8));
+    //simuOutput->SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF, 0xD8));
     simuSkeleton->Add(simuOutput, 0, wxALL | wxEXPAND, 10);
 
     simuPage->SetSizer(simuSkeleton);
     notebook->AddPage(simuPage, "Simulation");
 
-    Bind(wxEVT_LIST_ITEM_SELECTED, [=](wxListEvent&){
-        int selected = schedulerList->GetFirstSelected();
-        switch(selected){
-            case 0:
-                schedulerDesc->SetValue(FIFO_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x91, 0x91, 0x91));
-                graph->SetColourTheme(wxColour(0xEE,0xEE,0xEE), *wxBLACK, *wxBLACK);
-                break;
-            case 1:
-                schedulerDesc->SetValue(SJF_DESC);
-                simuPage->SetBackgroundColour(wxColour(0xFA, 0xEC, 0x57));
-                graph->SetColourTheme(wxColour(0xFE,0xFC,0xE5), *wxBLACK, *wxBLACK);
-                break;
-            case 2:
-                schedulerDesc->SetValue(RR_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x5F, 0xFA, 0x62));
-                graph->SetColourTheme(wxColour(0xE7,0xFE,0xE7), *wxBLACK, *wxBLACK);
-                break;
-            case 3:
-                schedulerDesc->SetValue(RRR_DESC);
-                simuPage->SetBackgroundColour(wxColour(0xED, 0x40, 0x40));
-                graph->SetColourTheme(wxColour(0xFC,0xE2,0xE2), *wxBLACK, *wxBLACK);
-                break;
-            case 4:
-                schedulerDesc->SetValue(SWQ_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x69,0xAE,0xC7));
-                graph->SetColourTheme(wxColour(0xE8,0xF3,0xF6), *wxBLACK, *wxBLACK);
-                break;
-        }
-    });
+    Bind(wxEVT_LIST_ITEM_SELECTED, [=](wxCommandEvent&){ selectScheduler(); }, schedulerList->GetId());
     schedulerList->Select(0);
 }
 

@@ -16,6 +16,7 @@ void RedRobinRestaurant(std::list<process*> jobs){
 
   int numjobs = jobs.size();
   std::cout << "Running " << numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
+  simuPrint("Running " + std::to_string(numjobs) + " with Red Robin (Restaurant) Scheduling\n");
   time_t starttime = time(nullptr);
 
   const int maxCycles = 2;
@@ -29,15 +30,18 @@ void RedRobinRestaurant(std::list<process*> jobs){
     {
       case RUNNING:
         std::cout << "Running Job " << jobs.front()->getID() << "." << std::endl;
+        simuPrint("Running Job " + std::to_string(jobs.front()->getID()) + ".\n");
         std::this_thread::sleep_for(TIME_SLICE);
         break;
       case BLOCKED:
         jobs.front()->ioCall();
         std::cout << "Job " << jobs.front()->getID() << " IO Call" << std::endl;
+        simuPrint("Job " + std::to_string(jobs.front()->getID()) + " IO Call\n");
         std::this_thread::sleep_for(IO_TIME);
         break;
      case DONE:
         std::cout << "Completed Job " << jobs.front()->getID() << "." << std::endl;
+        simuPrint("Completed Job " + std::to_string(jobs.front()->getID()) + ".\n");
         jobs.pop_front();
         if (jobs.size() > 0){
           firstProc = jobs.front();
@@ -56,5 +60,5 @@ void RedRobinRestaurant(std::list<process*> jobs){
   }
 
   std::cout << "Finished Processing" << std::endl;
-
+  simuPrint("Finished Processing\n");
 }

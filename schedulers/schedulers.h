@@ -4,6 +4,7 @@
 #include <numeric>
 #include <thread>
 #include "../processes.h"
+#include <wx/wx.h>
 
 #define IO_TIME std::chrono::seconds(2)
 #define TIME_SLICE std::chrono::seconds(1)
@@ -14,3 +15,5 @@ void SJF(std::list<process*> jobs);
 void roundRobin(std::list<process*> jobs);
 void SWQ(std::list<process*> jobs);
 void RedRobinRestaurant(std::list<process*> jobs);
+
+void simuPrint(const wxString& text);

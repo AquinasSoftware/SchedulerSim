@@ -17,6 +17,7 @@ void SWQ(std::list<process*> jobs){
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
     running.detach();
     std::cout << "Running " << numJobs << " with SWQ Scheduling" << std::endl;
+    simuPrint("Running " + std::to_string(numJobs) + " with SWQ Scheduling\n");
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
         while(window.size() < WINDOW_SIZE){
@@ -40,11 +41,13 @@ void SWQ(std::list<process*> jobs){
                 case DONE:
                     turnTimes[window.front()->getID()] = window.front()->turnaround();
                     std::cout << window.front()->getID() << ": Done" << std::endl;
+                    simuPrint("Process " + std::to_string(window.front()->getID()) + ": Done\n");
                     delete window.front();
                     window.pop_front();
                     break;
                 default:
                     std::cout << window.front()->getID() << ": Running" << std::endl;
+                    simuPrint("Process " + std::to_string(window.front()->getID()) + ": Running\n");
                     window.push_back(window.front());
                     window.pop_front();
                     break;
@@ -55,4 +58,5 @@ void SWQ(std::list<process*> jobs){
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
+    simuPrint("Completed all jobs\n\tAvg Response Time: " + std::to_string(avgResp) + " seconds\n\tAvg Turnaround Time: " + std::to_string(avgTurn) + " seconds\n");
 }
