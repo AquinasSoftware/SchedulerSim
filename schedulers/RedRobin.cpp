@@ -7,12 +7,10 @@ order of arrival. RRR is a mix of FIFO and Round Robin.
 
 ** Red Robin Batman ***
 
-
-
 */
 #include "schedulers.h"
 
-void RedRobinRestaurant(std::list<process*> jobs){
+void RedRobinRestaurant(std::list<process*> &jobs){
 
   int numjobs = jobs.size();
   std::cout << "Running " << numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
@@ -61,4 +59,8 @@ void RedRobinRestaurant(std::list<process*> jobs){
 
   std::cout << "Finished Processing" << std::endl;
   simuPrint("Finished Processing\n");
+  clearQueue();
+  setupPage->Enable();
+  startBtn->Enable();
+  exportBtn->Enable();
 }

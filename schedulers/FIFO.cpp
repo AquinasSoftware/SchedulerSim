@@ -5,10 +5,28 @@
     Takes a list of processes and runs each one through 
     to completion, one at a time
 *************************************/
-void FIFO(std::list<process*> jobs){
+void FIFO(std::list<process*> &jobs){
+    //Setup
     float numJobs = jobs.size();
     double respTimes[(short)numJobs];
     double turnTimes[(short)numJobs];
+    short respCounter = 0;
+    short turnCounter = 0;
+    mpFXYVector* respLine = new mpFXYVector("Response Time");
+    mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
+    respLine->SetPen(*wxRED);
+    turnLine->SetPen(*wxGREEN);
+    respLine->SetContinuity(true);
+    turnLine->SetContinuity(true);
+    respLine->SetSymbol(mpsCircle);
+    turnLine->SetSymbol(mpsCircle);
+    respLine->AddData(0, 0, true);
+    turnLine->AddData(0, 0, true);
+    graph->AddLayer(respLine);
+    graph->AddLayer(turnLine);
+    graph->Fit();
+
+    // Simulation
     std::cout << "Running " << numJobs << " with FIFO Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with FIFO Scheduling\n");
     while(jobs.size() > 0){
@@ -21,6 +39,8 @@ void FIFO(std::list<process*> jobs){
                 break;
             case DONE:
                 turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
+                turnCounter++;
+                turnLine->AddData((float)(turnCounter / numJobs) * 100, (std::accumulate(turnTimes, turnTimes + turnCounter, 0.0) / (turnCounter)), true);
                 std::cout << jobs.front()->getID() << ": Done" << std::endl;
                 simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Done\n");
                 delete(jobs.front());
@@ -29,15 +49,22 @@ void FIFO(std::list<process*> jobs){
             default:
                 if (!(jobs.front()->isResponded())){
                     respTimes[jobs.front()->getID()] = jobs.front()->respond();
+                    respCounter++;
+                    respLine->AddData((float)(respCounter / numJobs) * 100, (std::accumulate(respTimes, respTimes + respCounter, 0.0) / (respCounter)), true);
                 }
                 std::cout << jobs.front()->getID() << ": Running" << std::endl;
                 simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
                 std::this_thread::sleep_for(TIME_SLICE);
         }
+        updateGraph();
     }
 
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
     simuPrint("Completed all jobs\n\tAvg Response Time: " + std::to_string(avgResp) + " seconds\n\tAvg Turnaround Time: " + std::to_string(avgTurn) + " seconds\n");
+    clearQueue();
+    setupPage->Enable();
+    startBtn->Enable();
+    exportBtn->Enable();
 }

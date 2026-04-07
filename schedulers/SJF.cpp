@@ -1,11 +1,28 @@
 #include "schedulers.h"
 
-void SJF(std::list<process*> jobs){
+void SJF(std::list<process*> &jobs){
     float numJobs = jobs.size();
     std::cout << "Running " << numJobs << " with Round SJF Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with SJF Scheduling\n");
     double respTimes[(short)numJobs];
     double turnTimes[(short)numJobs];
+    short respCounter = 0;
+    short turnCounter = 0;
+    float respSum = 0;
+    float turnSum = 0;
+    mpFXYVector* respLine = new mpFXYVector("Response Time");
+    mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
+    respLine->SetPen(*wxRED);
+    turnLine->SetPen(*wxGREEN);
+    respLine->SetContinuity(true);
+    turnLine->SetContinuity(true);
+    respLine->SetSymbol(mpsCircle);
+    turnLine->SetSymbol(mpsCircle);
+    respLine->AddData(0, 0, true);
+    turnLine->AddData(0, 0, true);
+    graph->AddLayer(respLine);
+    graph->AddLayer(turnLine);
+    graph->Fit();
     std::list<process*> ioQueue;
     jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
@@ -16,6 +33,9 @@ void SJF(std::list<process*> jobs){
         if (sizeMonitor > 0){
             if (!(jobs.front()->isResponded())){
                 respTimes[jobs.front()->getID()] = jobs.front()->respond();
+                respSum += respTimes[jobs.front()->getID()];
+                respCounter++;
+                respLine->AddData((float)(respCounter / numJobs) * 100, (respSum / (respCounter)), true);
             }
             switch (jobs.front()->run()){
                 case BLOCKED:
@@ -24,6 +44,9 @@ void SJF(std::list<process*> jobs){
                     break;
                 case DONE:
                     turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
+                    turnSum += turnTimes[jobs.front()->getID()];
+                    turnCounter++;
+                    turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
                     std::cout << jobs.front()->getID() << ": Done" << std::endl;
                     simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Done\n");
                     delete jobs.front();
@@ -34,6 +57,7 @@ void SJF(std::list<process*> jobs){
                     simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
                     break;
             }
+            updateGraph();
         }
         std::this_thread::sleep_for(TIME_SLICE);
         if (sizeMonitor < jobs.size()){
@@ -44,4 +68,8 @@ void SJF(std::list<process*> jobs){
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
     simuPrint("Completed all jobs\n\tAvg Response Time: " + std::to_string(avgResp) + " seconds\n\tAvg Turnaround Time: " + std::to_string(avgTurn) + " seconds\n");
+    clearQueue();
+    setupPage->Enable();
+    startBtn->Enable();
+    exportBtn->Enable();
 }

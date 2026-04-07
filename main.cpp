@@ -1,11 +1,13 @@
 #include "main.h"
 std::list<process*> jobs;
+wxPanel* setupPage;
 wxListView* taskList;
 wxListView* taskQueue;
 wxListView* schedulerList;
 wxTextCtrl* schedulerDesc;
 wxPanel* simuPage;
 wxButton* startBtn;
+wxButton* exportBtn;
 mpWindow* graph;
 wxTextCtrl* simuOutput;
 
@@ -47,7 +49,7 @@ bool GUI::OnInit()
 }
 
 windowFrame::windowFrame()
-    : wxFrame(nullptr, wxID_ANY, "Scheduler Simulator", 
+    : wxFrame(nullptr, wxID_ANY, "Scheduler Sim", 
         wxDefaultPosition, wxSize(800, 720),
         wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)){
 
@@ -55,7 +57,7 @@ windowFrame::windowFrame()
 
     wxNotebook* notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_TOP);
 
-    wxPanel* setupPage = new wxPanel(notebook, wxID_ANY);
+    setupPage = new wxPanel(notebook, wxID_ANY);
     wxBoxSizer *setupSkeleton = new wxBoxSizer(wxVERTICAL);
 
 // Step 1: Process Queue Creation
@@ -129,28 +131,29 @@ windowFrame::windowFrame()
     wxBoxSizer *controlButtons = new wxBoxSizer(wxHORIZONTAL);
     startBtn = new wxButton(simuPage, wxID_ANY, "Start");
     Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ startSimulation(); }, startBtn->GetId());
-    wxButton* resetBtn = new wxButton(simuPage, wxID_ANY, "Reset");
+    exportBtn = new wxButton(simuPage, wxID_ANY, "Export");
+    exportBtn->Disable();
+    Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ exportGraph(); }, exportBtn->GetId());
     controlButtons->Add(startBtn, 0, wxALL, 5);
-    controlButtons->Add(resetBtn, 0, wxALL, 5);
+    controlButtons->Add(exportBtn, 0, wxALL, 5);
     simuSkeleton->Add(controlButtons, 0, wxALL, 5);
 
 // Graph
     graph = new mpWindow(simuPage, wxID_ANY, wxDefaultPosition, wxSize(750, 400));
     
-    mpLayer* axisX = new mpScaleX("Simulated Time", mpALIGN_BOTTOM, true);
-    mpLayer* axisY = new mpScaleY("Average Time", mpALIGN_LEFT, true);
+    mpLayer* axisX = new mpScaleX("Jobs Handled (Total %)", mpALIGN_BOTTOM, true);
+    mpLayer* axisY = new mpScaleY("Average Time (Seconds)", mpALIGN_LEFT, true);
     graph->AddLayer(axisX);
     graph->AddLayer(axisY);
     graph->SetScaleX(10);
     graph->SetPosX(0);
     graph->SetScaleY(10, 0);
     graph->SetColourTheme(wxColour(0xFF, 0xFF, 0xFF, 0xCC), *wxBLACK, *wxBLACK);
-    simuSkeleton->Add(graph, 1, wxALL | wxEXPAND, 10);
+    simuSkeleton->Add((mpWindow*)graph, 1, wxALL | wxEXPAND, 10);
 
     simuOutput = new wxTextCtrl(simuPage, wxID_ANY, "", wxDefaultPosition, wxSize(780, 200), wxTE_MULTILINE | wxTE_READONLY);   
     simuOutput->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     simuOutput->SetMargins(10, 5);
-    //simuOutput->SetBackgroundColour(wxColour(0xFF, 0xFF, 0xFF, 0xD8));
     simuSkeleton->Add(simuOutput, 0, wxALL | wxEXPAND, 10);
 
     simuPage->SetSizer(simuSkeleton);
@@ -162,9 +165,9 @@ windowFrame::windowFrame()
 
 void windowFrame::OnExit(wxCommandEvent& event)
 {
+    clearQueue();
     Close(true);
 }
-
 
 // CMD Testing Function
 void devTest(){

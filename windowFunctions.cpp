@@ -12,34 +12,34 @@ void addToJobs(){
 
 void removeFromJobs(){
     if (taskQueue->GetItemCount() == 0) return;
+    // Delete process
     long selected = taskQueue->GetFirstSelected();
     if (selected == -1) return;
     taskQueue->DeleteItem(selected);
     std::list<process*>::iterator iter = jobs.begin();
     std::advance(iter, selected);
     delete *iter;
-    std::list<process*>::iterator iter2 = iter;;
-    std::advance(iter, 1);
-    while (iter != jobs.end()){
-        (*iter2) = (*iter);
-        (*iter2)->setID((*iter2)->getID() - 1);
-        std::advance(iter2, 1);
-        std::advance(iter, 1);
+    jobs.erase(iter);
+
+    // Reassign IDs
+    int newID = 0;
+    for (process* &proc : jobs){
+        proc->setID(newID++);
     }
-    jobs.pop_back();
 
     // Refresh the list
-    iter = jobs.begin();
-    std::advance(iter, selected);
-    for (long i = selected; i < taskQueue->GetItemCount(); i++){
-        taskQueue->SetItem(i, 0, std::to_string((*iter)->getID()));
-        taskQueue->SetItem(i, 1, (*iter)->getType());
+    taskQueue->DeleteAllItems();
+    for (process* &proc : jobs){
+        taskQueue->InsertItem(taskQueue->GetItemCount(), std::to_string(proc->getID()));
+        taskQueue->SetItem(taskQueue->GetItemCount() - 1, 1, proc->getType());
     }
 }
 
 void clearQueue(){
     while (jobs.size() > 0){
-        delete jobs.front();
+        if (jobs.front() != nullptr){
+            delete jobs.front();
+        }
         jobs.pop_front();
     }
     taskQueue->DeleteAllItems();
@@ -82,6 +82,13 @@ void selectScheduler(){
 }
 
 void startSimulation(){
+    if(jobs.size() == 0){
+        return;
+    }
+    graph->DelAllPlot(mpYesDelete);
+    mpInfoLegend* legend = new mpInfoLegend(wxRect(10, 10, 600, 75));
+    legend->SetItemDirection(mpHorizontal);
+    graph->AddLayer(legend);
     std::thread simuThread;
     switch(selectedScheduler){
         case FIFO_SCHEDULER:
@@ -101,6 +108,8 @@ void startSimulation(){
             break;
     }
     startBtn->Disable();
+    exportBtn->Disable();
+    setupPage->Disable();
     simuThread.detach();
 }
 
@@ -109,6 +118,30 @@ void simuPrint(const wxString& text){
         wxTheApp->CallAfter([text](){
             simuOutput->AppendText(text);
             simuOutput->ScrollLines(-1);
+        });
+    }
+}
+
+void updateGraph(){
+    if (wxTheApp){
+        wxTheApp->CallAfter([](){
+            graph->UpdateAll();
+            graph->Fit();
+        });
+    }
+}
+
+void exportGraph(){
+    wxFileDialog saveFileDialog(nullptr, "Save Graph", "", "",
+        "PNG files (*.png)|*.png|All files (*.*)|*.*", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    graph->SaveScreenshot(saveFileDialog.GetPath(), wxBITMAP_TYPE_PNG, wxDefaultSize, true);
+    if (wxTheApp){
+        wxTheApp->CallAfter([](){
+            wxMessageBox("Graph exported successfully!", "Graph Exported", wxICON_INFORMATION | wxOK);
         });
     }
 }

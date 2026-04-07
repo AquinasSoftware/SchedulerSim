@@ -1,9 +1,27 @@
 #include "schedulers.h"
 
-void roundRobin(std::list<process*> jobs){
+void roundRobin(std::list<process*> &jobs){
     float numJobs = jobs.size();
     double respTimes[(short)numJobs];
     double turnTimes[(short)numJobs];
+    short respCounter = 0;
+    short turnCounter = 0;
+    float respSum = 0;
+    float turnSum = 0;
+    mpFXYVector* respLine = new mpFXYVector("Response Time");
+    mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
+    respLine->SetPen(*wxRED);
+    turnLine->SetPen(*wxGREEN);
+    respLine->SetContinuity(true);
+    turnLine->SetContinuity(true);
+    respLine->SetSymbol(mpsCircle);
+    turnLine->SetSymbol(mpsCircle);
+    respLine->AddData(0, 0, true);
+    turnLine->AddData(0, 0, true);
+    graph->AddLayer(respLine);
+    graph->AddLayer(turnLine);
+    graph->Fit();
+
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with Round Robin Scheduling\n");
     std::list<process*> ioQueue;
@@ -16,6 +34,9 @@ void roundRobin(std::list<process*> jobs){
         }
         if (!(jobs.front()->isResponded())){
             respTimes[jobs.front()->getID()] = jobs.front()->respond();
+            respSum += respTimes[jobs.front()->getID()];
+            respCounter++;
+            respLine->AddData((float)(respCounter / numJobs) * 100, (respSum / (respCounter)), true);
         }
         switch (jobs.front()->run()){
             case RUNNING:
@@ -28,6 +49,9 @@ void roundRobin(std::list<process*> jobs){
                 break;
             case DONE:
                 turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
+                turnSum += turnTimes[jobs.front()->getID()];
+                turnCounter++;
+                turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
                 std::cout << jobs.front()->getID() << ": Done" << std::endl;
                 simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Done\n");
                 delete(jobs.front());
@@ -35,9 +59,14 @@ void roundRobin(std::list<process*> jobs){
         }
         jobs.pop_front();
         std::this_thread::sleep_for(TIME_SLICE);
+        updateGraph();
     }
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
     simuPrint("Completed all jobs\n\tAvg Response Time: " + std::to_string(avgResp) + " seconds\n\tAvg Turnaround Time: " + std::to_string(avgTurn) + " seconds\n");
+    clearQueue();
+    setupPage->Enable();
+    startBtn->Enable();
+    exportBtn->Enable();
 }
