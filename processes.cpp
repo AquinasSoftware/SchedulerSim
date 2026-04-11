@@ -26,9 +26,21 @@ const char* process::getType(){
             return "Text Editor";
         case MEDIA_PLAYER:
             return "Media Player";
+        case IMAGE_EDITOR:
+            return "Image Editor";
+        case WEB_BROWSER:
+            return "Web Browser";
+        case VIDEO_STREAMER:
+            return "Video Streamer";
+        case GAME:
+            return "Game";
         default:
             return "Unknown";
     }
+}
+
+enum procName process::getProcEnum(){
+    return procType;
 }
 
 short process::getStatus(){

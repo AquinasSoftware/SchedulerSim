@@ -113,6 +113,73 @@ void startSimulation(){
     simuThread.detach();
 }
 
+void importJobs(){
+    wxFileDialog openFileDialog(nullptr, "Import Process Queue", "", "",
+        "Scheduler Sim queue files (*.ssq)|*.ssq|All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    std::ifstream inFile(openFileDialog.GetPath().ToStdString());
+    if (!inFile){
+        wxMessageBox("Error opening file!", "Error", wxICON_ERROR | wxOK);
+        return;
+    }
+
+    wxSetCursor(wxCursor(wxCURSOR_WAIT));
+    setupPage->Disable();
+    simuPage->Disable();
+    clearQueue();
+    std::string line;
+    if (std::getline(inFile, line)){
+        std::istringstream ss(line);
+        std::string processID;
+        int id = 0;
+        while (std::getline(ss, processID, ',')){
+            enum procName type = static_cast<enum procName>(std::stoi(processID));
+            process *newProcess = new process(type, id++);
+            jobs.push_back(newProcess);
+            taskQueue->InsertItem(taskQueue->GetItemCount(), std::to_string(newProcess->getID()));
+            taskQueue->SetItem(taskQueue->GetItemCount() - 1, 1, newProcess->getType());
+        }
+    }
+    inFile.close();
+    wxSetCursor(wxCursor(wxNullCursor));
+    setupPage->Enable();
+    simuPage->Enable();
+    wxMessageBox("Process queue imported successfully!", "Imported", wxICON_INFORMATION | wxOK);
+}
+
+void exportJobs(){
+    wxFileDialog saveFileDialog(nullptr, "Export Process Queue", "", "",
+        "Scheduler Sim queue files (*.ssq)|*.ssq", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+    std::string filePath = saveFileDialog.GetPath().ToStdString();
+    if (filePath.substr(filePath.find_last_of(".") + 1) != "ssq"){
+        filePath += ".ssq";
+    }
+    std::ofstream outFile(filePath);
+    if (!outFile){
+        wxMessageBox("Error saving file!", "Error", wxICON_ERROR | wxOK);
+        return;
+    }
+
+    setupPage->Disable();
+    simuPage->Disable();
+    wxSetCursor(wxCursor(wxCURSOR_WAIT));   
+    for (process* &proc : jobs){
+        outFile << proc->getProcEnum() << ",";
+    }
+    outFile.close();
+    wxSetCursor(wxCursor(wxNullCursor));
+    setupPage->Enable();
+    simuPage->Enable();
+    wxMessageBox("Process queue exported successfully!", "Exported", wxICON_INFORMATION | wxOK);
+}
+
 void simuPrint(const wxString& text){
     if (wxTheApp){
         wxTheApp->CallAfter([text](){
@@ -138,7 +205,13 @@ void exportGraph(){
     if (saveFileDialog.ShowModal() == wxID_CANCEL)
         return;
 
-    graph->SaveScreenshot(saveFileDialog.GetPath(), wxBITMAP_TYPE_PNG, wxDefaultSize, true);
+    std::string filePath = saveFileDialog.GetPath().ToStdString();
+
+    if (filePath.substr(filePath.find_last_of(".") + 1) != "png"){
+        filePath += ".png";
+    }
+    
+    graph->SaveScreenshot(filePath, wxBITMAP_TYPE_PNG, wxDefaultSize, true);
     if (wxTheApp){
         wxTheApp->CallAfter([](){
             wxMessageBox("Graph exported successfully!", "Graph Exported", wxICON_INFORMATION | wxOK);

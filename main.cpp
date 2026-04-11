@@ -44,6 +44,8 @@ bool GUI::OnInit()
 
     // Else, run the GUI
     windowFrame *frame = new windowFrame();
+    wxInitAllImageHandlers();
+    frame->SetIcon(wxIcon("ss.xpm"));
     frame->Show(true);
     return true;
 }
@@ -69,23 +71,37 @@ windowFrame::windowFrame()
     taskList = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(200, 250), wxLC_REPORT | wxLC_SINGLE_SEL);
     taskList->InsertColumn(0, "Process Type");
     taskList->SetColumnWidth(0, 200);
-    taskList->InsertItem(0, "OS Function");
-    taskList->InsertItem(1, "Text Editor");
-    taskList->InsertItem(2, "Media Player");
+    taskList->InsertItem(0, "AI Desktop Assistant");
+    taskList->InsertItem(1, "Antivirus Scanner");
+    taskList->InsertItem(2, "File Compressor");
+    taskList->InsertItem(3, "Image Editor");
+    taskList->InsertItem(4, "Media Player");
+    taskList->InsertItem(5, "OS Function");
+    taskList->InsertItem(6, "Text Editor");
+    taskList->InsertItem(7, "Web Browser");
+    taskList->InsertItem(8, "Video Streamer");
+
     step1Skeleton->Add(taskList, 0, wxLEFT, 10);
 
     wxBoxSizer* taskButtons = new wxBoxSizer(wxVERTICAL);
     wxButton* addTaskBtn = new wxButton(setupPage, wxID_ANY, "Add");
     wxButton* removeTaskBtn = new wxButton(setupPage, wxID_ANY, "Remove");
     wxButton* clearTasksBtn = new wxButton(setupPage, wxID_ANY, "Clear All");
+    wxStaticLine* btnDivider = new wxStaticLine(setupPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL);
+    wxButton* importTasksBtn = new wxButton(setupPage, wxID_ANY, "Import");
+    wxButton* exportTasksBtn = new wxButton(setupPage, wxID_ANY, "Export");
     taskButtons->Add(addTaskBtn, 0, wxALL, 5);
-    
     taskButtons->Add(removeTaskBtn, 0, wxALL, 5);
     taskButtons->Add(clearTasksBtn, 0, wxALL, 5);
+    taskButtons->Add(btnDivider, 0, wxEXPAND | wxALL, 5);
+    taskButtons->Add(importTasksBtn, 0, wxALL, 5);
+    taskButtons->Add(exportTasksBtn, 0, wxALL, 5);
     step1Skeleton->Add(taskButtons, 0, wxALL | wxALIGN_CENTER_VERTICAL, 10);
     Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ addToJobs(); }, addTaskBtn->GetId());
     Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ removeFromJobs(); }, removeTaskBtn->GetId());
     Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ clearQueue(); }, clearTasksBtn->GetId());
+    Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ importJobs(); }, importTasksBtn->GetId());
+    Bind(wxEVT_BUTTON, [=](wxCommandEvent&){ exportJobs(); }, exportTasksBtn->GetId());
     taskQueue = new wxListView(setupPage, wxID_ANY, wxDefaultPosition, wxSize(250, 250), wxLC_REPORT);
     taskQueue->InsertColumn(0, "Process ID");
     taskQueue->InsertColumn(1, "Type");

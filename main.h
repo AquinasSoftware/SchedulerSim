@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <wx/notebook.h>
 #include <wx/panel.h>
 #include <wx/listctrl.h>
@@ -25,6 +27,8 @@ enum scheduler{
 void devTest();
 void addToJobs();
 void removeFromJobs();
+void importJobs();
+void exportJobs();
 void selectScheduler();
 void startSimulation();
 void exportGraph();
