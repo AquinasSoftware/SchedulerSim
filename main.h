@@ -21,6 +21,8 @@ enum scheduler{
     SJF_SCHEDULER,
     RR_SCHEDULER,
     RRR_SCHEDULER,
+    RRB_SCHEDULER,
+    DR_SCHEDULER,
     SWQ_SCHEDULER
 };
 
