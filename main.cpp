@@ -111,7 +111,8 @@ windowFrame::windowFrame()
     schedulerList->InsertItem(1, "Shortest Job First");
     schedulerList->InsertItem(2, "Round Robin");
     schedulerList->InsertItem(3, "Red Robin Restaurant");
-    schedulerList->InsertItem(4, "Smart Window Queue");
+    schedulerList->InsertItem(4, "Red Robin Batman");
+    schedulerList->InsertItem(5, "Smart Window Queue");
 
     step2Skeleton->Add(schedulerList, 0, wxALL | wxEXPAND, 10);
 
@@ -184,7 +185,7 @@ void devTest(){
     jobs.push_back(job5);
 
     std::cout << "Enter Scheduler:" << std::endl;
-    std::cout << "1. FIFO\n2. SJF\n3. RR\n4. RRR\n5. SWQ\n\n";
+    std::cout << "1. FIFO\n2. SJF\n3. RR\n4. RRR\n5. RRB\n6. SWQ\n\n";
 
     int choice;
     std::cin >> choice;
@@ -201,6 +202,9 @@ void devTest(){
             break;
         case 4:
             RedRobinRestaurant(jobs);
+            break;
+        case 5:
+            RedRobinBatman(jobs);
             break;
         default:
             SWQ(jobs);

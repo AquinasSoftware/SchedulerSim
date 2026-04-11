@@ -13,11 +13,16 @@ const char RR_DESC[145] =
 "Each process is assigned a fixed time slice and is executed in a rotation. "
 "This approach minimized the average response time.";
 
-const char RRR_DESC[280] =
+const char RRR_DESC[280] = 
 "Red Robin Restaurant (RRR):\n\n"
 "Processes are put in a rotating queue with the time slice determined by seniority. "
 "This approach balances fairness and efficiency.";
 
+const char RRB_DESC[240] = 
+"Red Robin Batman (RRB):\n\n"
+"Categorizes jobs into 'goon' (short) and 'boss' (long). "
+"Goon jobs are FIFO'd for speed, while Boss jobs use Round Robin. "
+"This approach maximizes efficiency for short tasks.";
 const char DR_DESC[219] =
 "Dead Robin (DR):\n\n"
 "The Least Efficient Scheduler. The longest jobs are executed firs in a "
