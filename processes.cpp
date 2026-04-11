@@ -32,8 +32,6 @@ const char* process::getType(){
             return "Web Browser";
         case VIDEO_STREAMER:
             return "Video Streamer";
-        case GAME:
-            return "Game";
         default:
             return "Unknown";
     }

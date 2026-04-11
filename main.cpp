@@ -160,7 +160,7 @@ windowFrame::windowFrame()
     graph = new mpWindow(simuPage, wxID_ANY, wxDefaultPosition, wxSize(750, 400));
     
     mpLayer* axisX = new mpScaleX("Jobs Handled (Total %)", mpALIGN_BOTTOM, true);
-    mpLayer* axisY = new mpScaleY("Average Time (Seconds)", mpALIGN_LEFT, true);
+    mpLayer* axisY = new mpScaleY("Average Time (nanoseconds)", mpALIGN_LEFT, true);
     graph->AddLayer(axisX);
     graph->AddLayer(axisY);
     graph->SetScaleX(10);
