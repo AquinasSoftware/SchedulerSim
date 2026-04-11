@@ -75,10 +75,16 @@ void selectScheduler(){
             case 4:
                 selectedScheduler = RRB_SCHEDULER;
                 schedulerDesc->SetValue(RRB_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x40, 0x40, 0xED));
-                graph->SetColourTheme(wxColour(0xE2,0xE2,0xFC), *wxBLACK, *wxBLACK);
+                simuPage->SetBackgroundColour(*wxBLACK);
+                graph->SetColourTheme(*wxBLACK, *wxWHITE, *wxWHITE);
                 break;
             case 5:
+                selectedScheduler = DR_SCHEDULER;
+                schedulerDesc->SetValue(DR_DESC);
+                simuPage->SetBackgroundColour(wxColour(0x55, 0x55, 0x50));
+                graph->SetColourTheme(wxColour(0x44, 0x44, 0x40), *wxLIGHT_GREY, *wxLIGHT_GREY);
+                break;
+            case 6:
                 selectedScheduler = SWQ_SCHEDULER;
                 schedulerDesc->SetValue(SWQ_DESC);
                 simuPage->SetBackgroundColour(wxColour(0x69,0xAE,0xC7));
@@ -111,6 +117,9 @@ void startSimulation(){
             break;
         case RRB_SCHEDULER:
             simuThread = std::thread(RedRobinBatman, std::ref(jobs));
+            break;
+        case DR_SCHEDULER:
+            simuThread = std::thread(DeadRobin, std::ref(jobs));
             break;
         default:
             simuThread = std::thread(SWQ, std::ref(jobs));

@@ -22,6 +22,7 @@ void roundRobin(std::list<process*> &jobs);
 void SWQ(std::list<process*> &jobs);
 void RedRobinRestaurant(std::list<process*> &jobs);
 void RedRobinBatman(std::list<process*> &jobs);
+void DeadRobin(std::list<process*> &jobs);
 
 void clearQueue();
 void simuPrint(const wxString& text);
