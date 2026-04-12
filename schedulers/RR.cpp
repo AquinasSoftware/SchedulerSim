@@ -1,5 +1,15 @@
 #include "schedulers.h"
 
+/* 
+RR - Round Robin
+Processes are put in a rotating queue and given a fixed time slice 
+to run. If a process doesn't finish within its time slice, it's 
+moved to the back of the queue. This approach is simple and fair, 
+but can lead to longer turnaround times for short processes if the
+time slice is too large, or increased overhead if the time slice is 
+too small.
+*/
+
 void roundRobin(std::list<process*> &jobs){
     float numJobs = jobs.size();
     double respTimes[(short)numJobs];

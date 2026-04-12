@@ -1,5 +1,16 @@
 #include "schedulers.h"
 
+/*
+ SJF - Shortest Job First
+ Processes are scheduled based on the shortest remaining time first.
+ This approach minimizes the average waiting time but can lead to 
+ starvation of longer processes. This is the theorietical best
+ scheduler for minimizing average waiting time, but it is not 
+ commonly used in practice due to the difficulty of accurately 
+ predicting process run times and the potential for starvation 
+ of longer processes.
+*/
+
 void SJF(std::list<process*> &jobs){
     float numJobs = jobs.size();
     std::cout << "Running " << numJobs << " with Round SJF Scheduling" << std::endl;

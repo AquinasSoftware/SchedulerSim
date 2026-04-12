@@ -23,6 +23,7 @@ const char RRB_DESC[240] =
 "Categorizes jobs into 'goon' (short) and 'boss' (long). "
 "Goon jobs are FIFO'd for speed, while Boss jobs use Round Robin. "
 "This approach maximizes efficiency for short tasks.";
+
 const char DR_DESC[219] =
 "Dead Robin (DR):\n\n"
 "The Least Efficient Scheduler. The longest jobs are executed firs in a "

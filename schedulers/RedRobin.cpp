@@ -1,13 +1,21 @@
-/* Red Robin
+/* Red Robin Set
 
-*** Red Robin Restaurant ***
+** Red Robin Restaurant **
 Red Robin (restaurant) is a scheduling algorithm based on a restaurant. 
 RRR aims to please ALL the customers (processes) but also serve them in
 order of arrival. RRR is a mix of FIFO and Round Robin.
 
 ** Red Robin Batman ***
+Processes are put in a rotating queue with the time slice determined 
+by seniority. This approach balances fairness and efficiency.
 
+** Dead Robin ***
+Processes are put in a rotating queue with the time slice determined
+by seniority, but the time slice is reduced by 10% after each cycle. 
+This approach balances fairness and efficiency, but also encourages 
+shorter processes to finish faster.
 */
+
 #include "schedulers.h"
 
 void RedRobinRestaurant(std::list<process*> &jobs){
