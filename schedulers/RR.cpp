@@ -18,6 +18,7 @@ void roundRobin(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -35,7 +36,7 @@ void roundRobin(std::list<process*> &jobs){
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with Round Robin Scheduling\n");
     std::list<process*> ioQueue;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
     while(jobs.size() > 0){
         while(jobs.front()->getStatus() == BLOCKED){
@@ -43,6 +44,8 @@ void roundRobin(std::list<process*> &jobs){
             jobs.pop_front();
         }
         if (!(jobs.front()->isResponded())){
+            std::cout << jobs.front()->getID() << ": Started" << std::endl;
+                simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Started\n");
             respTimes[jobs.front()->getID()] = jobs.front()->respond();
             respSum += respTimes[jobs.front()->getID()];
             respCounter++;
@@ -50,9 +53,8 @@ void roundRobin(std::list<process*> &jobs){
         }
         switch (jobs.front()->run()){
             case RUNNING:
+                std::this_thread::sleep_for(TIME_SLICE);
                 jobs.push_back(jobs.front());
-                std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
                 break;
             case BLOCKED:
                 ioQueue.push_back(jobs.front());
@@ -68,9 +70,9 @@ void roundRobin(std::list<process*> &jobs){
                 break;
         }
         jobs.pop_front();
-        std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;

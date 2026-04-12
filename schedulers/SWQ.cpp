@@ -16,6 +16,7 @@ void SWQ(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -31,10 +32,10 @@ void SWQ(std::list<process*> &jobs){
     graph->Fit();
     std::list<process*> ioQueue;
     std::list<process*> window;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
-    std::cout << "Running " << numJobs << " with SWQ Scheduling" << std::endl;
-    simuPrint("Running " + std::to_string(numJobs) + " with SWQ Scheduling\n");
+    std::cout << "Running " << (int)numJobs << " jobs with SWQ Scheduling" << std::endl;
+    simuPrint("Running " + std::to_string((int)numJobs) + " jobs with SWQ Scheduling\n");
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
         while(window.size() < WINDOW_SIZE){
@@ -48,6 +49,8 @@ void SWQ(std::list<process*> &jobs){
         }
         if(window.size() > 0){
             if (!(window.front()->isResponded())){
+                std::cout << window.front()->getID() << ": Started" << std::endl;
+                simuPrint("Process " + std::to_string(window.front()->getID()) + ": Started\n");
                 respTimes[window.front()->getID()] = window.front()->respond();
                 respSum += respTimes[window.front()->getID()];
                 respCounter++;
@@ -69,16 +72,16 @@ void SWQ(std::list<process*> &jobs){
                     window.pop_front();
                     break;
                 default:
-                    std::cout << window.front()->getID() << ": Running" << std::endl;
-                    simuPrint("Process " + std::to_string(window.front()->getID()) + ": Running\n");
                     window.push_back(window.front());
                     window.pop_front();
                     break;
             }
-            std::this_thread::sleep_for(TIME_SLICE);
         }
+        std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
+
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;

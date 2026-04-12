@@ -53,32 +53,32 @@ void RedRobinRestaurant(std::list<process*> &jobs){
   while(jobs.size() > 0){
 
     if (!(jobs.front()->isResponded())){
+        std::cout << "Job " << jobs.front()->getID() << ": Started" << std::endl;
+        simuPrint("Job " + std::to_string(jobs.front()->getID()) + ": Started\n");
         respTimes[jobs.front()->getID()] = jobs.front()->respond();
         respSum += respTimes[jobs.front()->getID()];
         respCounter++;
-        respLine->AddData((float)(respCounter / numjobs) * 100, (respSum / (respCounter)), true);
+        respLine->AddData(((float)(respCounter) / numjobs) * 100, (respSum / (respCounter)), true);
     }
 
     switch (jobs.front()->run())
     {
       case RUNNING:
-        std::cout << "Running Job " << jobs.front()->getID() << "." << std::endl;
-        simuPrint("Running Job " + std::to_string(jobs.front()->getID()) + ".\n");
         std::this_thread::sleep_for(TIME_SLICE);
         break;
       case BLOCKED:
         jobs.front()->ioCall();
-        std::cout << "Job " << jobs.front()->getID() << " IO Call" << std::endl;
-        simuPrint("Job " + std::to_string(jobs.front()->getID()) + " IO Call\n");
+        std::cout << "Job " << jobs.front()->getID() << " IO Access" << std::endl;
+        simuPrint("Job " + std::to_string(jobs.front()->getID()) + " IO Access\n");
         std::this_thread::sleep_for(IO_TIME);
         break;
      case DONE:
         turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
         turnSum += turnTimes[jobs.front()->getID()];
         turnCounter++;
-        turnLine->AddData((float)(turnCounter / numjobs) * 100, (turnSum / (turnCounter)), true);
-        std::cout << "Completed Job " << jobs.front()->getID() << "." << std::endl;
-        simuPrint("Completed Job " + std::to_string(jobs.front()->getID()) + ".\n");
+        turnLine->AddData(((float)(turnCounter) / numjobs) * 100, (turnSum / (turnCounter)), true);
+        std::cout << "Completed Job " << jobs.front()->getID() << "" << std::endl;
+        simuPrint("Completed Job " + std::to_string(jobs.front()->getID()) + "\n");
         jobs.pop_front();
         if (jobs.size() > 0){
           firstProc = jobs.front();
@@ -119,6 +119,7 @@ void RedRobinBatman(std::list<process*> &jobs){
   short turnCounter = 0;
   float respSum = 0;
   float turnSum = 0;
+  bool *doneFlag = new bool(false);
 
   mpFXYVector* respLine = new mpFXYVector("Response Time");
   mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
@@ -160,6 +161,8 @@ void RedRobinBatman(std::list<process*> &jobs){
   while(!goons.empty()){
     process* current = goons.front();
     if (!current->isResponded()){
+      std::cout << current->getID() << ": Started (Goon)" << std::endl;
+        simuPrint("Process " + std::to_string(current->getID()) + ": Started (Goon)\n");
       respTimes[current->getID()] = current->respond();
       respSum += respTimes[current->getID()];
       respCounter++;
@@ -184,8 +187,6 @@ void RedRobinBatman(std::list<process*> &jobs){
         goons.pop_front();
         break;
       default:
-        std::cout << current->getID() << ": Running (Goon)" << std::endl;
-        simuPrint("Process " + std::to_string(current->getID()) + ": Running (Goon)\n");
         std::this_thread::sleep_for(TIME_SLICE);
         break;
     }
@@ -198,7 +199,7 @@ void RedRobinBatman(std::list<process*> &jobs){
     simuPrint("Processing Bosses (Round Robin)...\n");
     
     std::list<process*> ioQueue;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(bosses));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(bosses), doneFlag);
     running.detach();
 
     while(!bosses.empty()){
@@ -223,6 +224,8 @@ void RedRobinBatman(std::list<process*> &jobs){
       process* current = bosses.front();
 
       if (!(current->isResponded())){
+        std::cout << current->getID() << ": Started (Boss)" << std::endl;
+          simuPrint("Process " + std::to_string(current->getID()) + ": Started (Boss)\n");
         respTimes[current->getID()] = current->respond();
         respSum += respTimes[current->getID()];
         respCounter++;
@@ -232,13 +235,9 @@ void RedRobinBatman(std::list<process*> &jobs){
       switch (current->run()){
         case RUNNING:
           bosses.push_back(current);
-          std::cout << current->getID() << ": Running (Boss)" << std::endl;
-          simuPrint("Process " + std::to_string(current->getID()) + ": Running (Boss)\n");
           break;
         case BLOCKED:
           ioQueue.push_back(current);
-          std::cout << current->getID() << ": I/O Call (Boss)" << std::endl;
-          simuPrint("Process " + std::to_string(current->getID()) + ": I/O Call (Boss)\n");
           break;
         case DONE:
           turnTimes[current->getID()] = current->turnaround();
@@ -256,6 +255,7 @@ void RedRobinBatman(std::list<process*> &jobs){
     }
   }
 
+  *doneFlag = true;
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
@@ -277,6 +277,7 @@ void DeadRobin(std::list<process*> &jobs){
   short turnCounter = 0;
   float respSum = 0;
   float turnSum = 0;
+  bool *doneFlag = new bool(false);
 
   mpFXYVector* respLine = new mpFXYVector("Response Time");
   mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
@@ -318,6 +319,8 @@ void DeadRobin(std::list<process*> &jobs){
   while(!bosses.empty()){
     process* current = bosses.front();
     if (!current->isResponded()){
+      std::cout << current->getID() << ": Started (Boss)" << std::endl;
+        simuPrint("Process " + std::to_string(current->getID()) + ": Started (Boss)\n");
       respTimes[current->getID()] = current->respond();
       respSum += respTimes[current->getID()];
       respCounter++;
@@ -342,8 +345,6 @@ void DeadRobin(std::list<process*> &jobs){
         bosses.pop_front();
         break;
       default:
-        std::cout << current->getID() << ": Running (Boss)" << std::endl;
-        simuPrint("Process " + std::to_string(current->getID()) + ": Running (Boss)\n");
         std::this_thread::sleep_for(TIME_SLICE);
         break;
     }
@@ -356,7 +357,7 @@ void DeadRobin(std::list<process*> &jobs){
     simuPrint("Processing Goons (Round Robin)...\n");
     
     std::list<process*> ioQueue;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(goons));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(goons), doneFlag);
     running.detach();
 
     while(!goons.empty()){
@@ -378,6 +379,8 @@ void DeadRobin(std::list<process*> &jobs){
       process* current = goons.front();
 
       if (!(current->isResponded())){
+        std::cout << current->getID() << ": Started (Goon)" << std::endl;
+          simuPrint("Process " + std::to_string(current->getID()) + ": Started (Goon)\n");
         respTimes[current->getID()] = current->respond();
         respSum += respTimes[current->getID()];
         respCounter++;
@@ -387,8 +390,6 @@ void DeadRobin(std::list<process*> &jobs){
       switch (current->run()){
         case RUNNING:
           goons.push_back(current);
-          std::cout << current->getID() << ": Running (Goon)" << std::endl;
-          simuPrint("Process " + std::to_string(current->getID()) + ": Running (Goon)\n");
           break;
         case BLOCKED:
           ioQueue.push_back(current);
@@ -411,6 +412,7 @@ void DeadRobin(std::list<process*> &jobs){
     }
   }
 
+  *doneFlag = true;
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;

@@ -48,12 +48,12 @@ void FIFO(std::list<process*> &jobs){
                 break;
             default:
                 if (!(jobs.front()->isResponded())){
+                    std::cout << jobs.front()->getID() << ": Started" << std::endl;
+                    simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Started\n");
                     respTimes[jobs.front()->getID()] = jobs.front()->respond();
                     respCounter++;
                     respLine->AddData((float)(respCounter / numJobs) * 100, (std::accumulate(respTimes, respTimes + respCounter, 0.0) / (respCounter)), true);
                 }
-                std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
                 std::this_thread::sleep_for(TIME_SLICE);
         }
         updateGraph();

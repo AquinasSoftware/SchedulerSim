@@ -21,6 +21,7 @@ void SJF(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -36,13 +37,15 @@ void SJF(std::list<process*> &jobs){
     graph->Fit();
     std::list<process*> ioQueue;
     jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0){
         short sizeMonitor = jobs.size();
         if (sizeMonitor > 0){
             if (!(jobs.front()->isResponded())){
+                std::cout << jobs.front()->getID() << ": Started" << std::endl;
+                    simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Started\n");
                 respTimes[jobs.front()->getID()] = jobs.front()->respond();
                 respSum += respTimes[jobs.front()->getID()];
                 respCounter++;
@@ -63,18 +66,17 @@ void SJF(std::list<process*> &jobs){
                     delete jobs.front();
                     jobs.pop_front();
                     break;
-                default:
-                    std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                    simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
+                default:       
+                    std::this_thread::sleep_for(TIME_SLICE);
                     break;
             }
             updateGraph();
         }
-        std::this_thread::sleep_for(TIME_SLICE);
         if (sizeMonitor < jobs.size()){
             jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
         }
     }
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
