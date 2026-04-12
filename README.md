@@ -13,10 +13,14 @@ Finally, 3 joke algorithms are included, Red Robin Restaraunt (RRR,) Red Robin B
 
 ## Building
 Pre-build binaries are included for Windows and Debian-based systems. However, The project files contain a Makefile for self-building on a linux system.
+
 ### Windows
-To build a Windows x64 version, the *build-essential* package containing make, gcc and g++ is required. Additionally, the *MinGW-w64* is needed for cross-compilation. Specifically, the Makefile utilizes *x86-64-w64-mingw32-g++*. All other binaries are included in the source files as static libraries. Finally, in the root folder, run ```make win64```.
+To build a Windows x64 version, the *build-essential* package containing make, gcc and g++ is required. Additionally, the *MinGW-w64* is needed for cross-compilation. Specifically, the Makefile utilizes *x86-64-w64-mingw32-g++*. All other binaries are included in the source files as static libraries. Finally, in the root folder, run ``make win64``.
+
 ### Linux
-To build a Linux version, the *build-essential* package containing make, gcc and g++ is required. Additionally, the wxWidgets 3.2 development library is required. Please note, the dev environment was on a debian-based system so some minor modifications to the Makefile may be required for other operating systems. The Linux option is default, so simply run ```make``` from the project root.
+To build a Linux version, the *build-essential* package containing make, gcc and g++ is required. Additionally, the wxWidgets 3.2 development library is required. Please note, the dev environment was on a debian-based system so some minor modifications to the Makefile may be required for other operating systems. The Linux option is default, so simply run ``make`` from the project root.
 
 ## Running
 For Windows, the Scheduler Sim package includes all the files needed to run it. On Linux, wxGTK 3.2 runtime libraries are required before running, along with The GTK3 and C++ runtimes.
+
+Additionally, running the program with the ``-dev`` flag from the command line allows running an algorithm using a pre-set job list and no GUI capabilities for low-powered systems.
