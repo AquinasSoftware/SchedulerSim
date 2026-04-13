@@ -72,12 +72,12 @@ void SWQ(std::list<process*> &jobs){
                     window.pop_front();
                     break;
                 default:
+                    std::this_thread::sleep_for(TIME_SLICE);
                     window.push_back(window.front());
                     window.pop_front();
                     break;
             }
         }
-        std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
 
