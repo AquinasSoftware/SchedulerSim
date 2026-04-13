@@ -97,6 +97,9 @@ void startSimulation(){
     if(jobs.size() == 0){
         return;
     }
+    for (process* p : jobs){
+        p->start();
+    }
     graph->DelAllPlot(mpYesDelete);
     mpInfoLegend* legend = new mpInfoLegend(wxRect(10, 10, 600, 75));
     legend->SetItemDirection(mpHorizontal);

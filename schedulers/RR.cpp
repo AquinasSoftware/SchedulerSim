@@ -1,10 +1,11 @@
 #include <iomanip>
+#include <chrono>
 #include "schedulers.h"
 
 void roundRobin(std::list<process*> &jobs){
     float numJobs = jobs.size();
-    double respTimes[(short)numJobs];
-    double turnTimes[(short)numJobs];
+    double respTimes[(short)numJobs] = {0};
+    double turnTimes[(short)numJobs] = {0};
     short respCounter = 0;
     short turnCounter = 0;
     float respSum = 0;
@@ -23,12 +24,16 @@ void roundRobin(std::list<process*> &jobs){
     graph->AddLayer(turnLine);
     graph->Fit();
 
+    long long totalCycles = 0;
+    auto start = std::chrono::high_resolution_clock::now();
+
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with Round Robin Scheduling\n");
     std::list<process*> ioQueue;
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
     running.detach();
     while(jobs.size() > 0){
+        totalCycles++;
         while(jobs.front()->getStatus() == BLOCKED){
             jobs.push_back(jobs.front());
             jobs.pop_front();
@@ -62,11 +67,17 @@ void roundRobin(std::list<process*> &jobs){
         std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);
     std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
     simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
+    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();
