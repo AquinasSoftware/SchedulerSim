@@ -107,9 +107,9 @@ void RedRobinRestaurant(std::list<process*> &jobs){
     double avgResp = std::accumulate(respTimes, respTimes + (short)numjobs, 0.0) / numjobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numjobs, 0.0) / numjobs;
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    std::cout << "Completed all jobs in " << totalTime << " microseconds\n\tAvg Response Time: " << avgResp << " microseconds\n\tAvg Turnaround Time: " << avgTurn << " microseconds" << std::endl;
     std::cout << "Total Cycles: " << totalCycles << std::endl;
-    simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+    simuPrint(wxString::Format("Completed all jobs in %.3f microseconds\n\tAvg Response Time: %.3f microseconds\n\tAvg Turnaround Time: %.3f microseconds\n", totalTime, avgResp, avgTurn));
     simuPrint("Total Cycles: " + std::to_string(totalCycles));
     clearQueue();
     setupPage->Enable();
@@ -274,9 +274,9 @@ void RedRobinBatman(std::list<process*> &jobs){
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << std::fixed << std::setprecision(3);
-  std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+  std::cout << "Completed all jobs in " << totalTime << " microseconds\n\tAvg Response Time: " << avgResp << " microseconds\n\tAvg Turnaround Time: " << avgTurn << " microseconds" << std::endl;
   std::cout << "Total Cycles: " << totalCycles << std::endl;
-  simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+  simuPrint(wxString::Format("Completed all jobs in %.3f microseconds\n\tAvg Response Time: %.3f microseconds\n\tAvg Turnaround Time: %.3f microseconds\n", totalTime, avgResp, avgTurn));
   simuPrint("Total Cycles: " + std::to_string(totalCycles));
   
   clearQueue();
@@ -441,9 +441,9 @@ void DeadRobin(std::list<process*> &jobs){
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << std::fixed << std::setprecision(3);
-  std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+  std::cout << "Completed all jobs in " << totalTime << " microseconds\n\tAvg Response Time: " << avgResp << " microseconds\n\tAvg Turnaround Time: " << avgTurn << " microseconds" << std::endl;
   std::cout << "Total Cycles: " << totalCycles << std::endl;
-  simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+  simuPrint(wxString::Format("Completed all jobs in %.3f microseconds\n\tAvg Response Time: %.3f microseconds\n\tAvg Turnaround Time: %.3f microseconds\n", totalTime, avgResp, avgTurn));
   simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\n");
   
   clearQueue();

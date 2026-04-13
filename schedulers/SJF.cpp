@@ -86,8 +86,8 @@ void SJF(std::list<process*> &jobs){
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-    simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+    std::cout << "Completed all jobs in " << totalTime << " microseconds\n\tAvg Response Time: " << avgResp << " microseconds\n\tAvg Turnaround Time: " << avgTurn << " microseconds" << std::endl;
+    simuPrint(wxString::Format("Completed all jobs in` %.3f microseconds\n\tAvg Response Time: %.3f microseconds\n\tAvg Turnaround Time: %.3f microseconds\n", totalTime, avgResp, avgTurn));
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();
