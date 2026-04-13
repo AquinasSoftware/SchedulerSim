@@ -1,4 +1,4 @@
-#include <iostream> // Temporary until GUI is made
+#include <iostream>
 #include <cstdlib>
 #include <list>
 #include <numeric>
@@ -12,10 +12,10 @@ extern wxButton* startBtn;
 extern wxButton* exportBtn;
 extern mpWindow* graph;
 
-#define IO_TIME std::chrono::nanoseconds(100)
-#define TIME_SLICE std::chrono::nanoseconds(1)
+#define IO_TIME std::chrono::seconds(1)
+#define TIME_SLICE std::chrono::milliseconds(500)
 
-void ioCall(std::list<process*> &ioQueue, std::list<process*> &jobs);
+void ioCall(std::list<process*> &ioQueue, std::list<process*> &jobs, bool *doneFlag);
 void FIFO(std::list<process*> &jobs);
 void SJF(std::list<process*> &jobs);
 void roundRobin(std::list<process*> &jobs);

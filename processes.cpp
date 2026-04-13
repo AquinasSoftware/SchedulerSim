@@ -26,14 +26,20 @@ void process::setID(short newID){
 
 const char* process::getType(){
     switch (procType){
+        case AI_DESKTOP_ASSISTANT:
+            return "AI Desktop Assistant";
+        case ANTIVIRUS_SCANNER:
+            return "Antivirus Scanner";
+        case FILE_COMPRESSOR:
+            return "File Compressor";
+        case IMAGE_EDITOR:
+            return "Image Editor";
+        case MEDIA_PLAYER:
+            return "Media Player";
         case OS_FUNCTION:
             return "OS Function";
         case TEXT_EDITOR:
             return "Text Editor";
-        case MEDIA_PLAYER:
-            return "Media Player";
-        case IMAGE_EDITOR:
-            return "Image Editor";
         case WEB_BROWSER:
             return "Web Browser";
         case VIDEO_STREAMER:

@@ -1,6 +1,7 @@
 #include "main.h"
 short selectedScheduler;
 
+// Add Job to Process Queue
 void addToJobs(){
     short id = jobs.size();
     enum procName type = static_cast<enum procName>(taskList->GetFirstSelected());
@@ -10,6 +11,7 @@ void addToJobs(){
     taskQueue->SetItem(taskQueue->GetItemCount() - 1, 1, newProcess->getType());
 }
 
+// Remove Job from Process Queue
 void removeFromJobs(){
     if (taskQueue->GetItemCount() == 0) return;
     // Delete process
@@ -35,6 +37,7 @@ void removeFromJobs(){
     }
 }
 
+// Clear Process Queue
 void clearQueue(){
     while (jobs.size() > 0){
         if (jobs.front() != nullptr){
@@ -45,14 +48,15 @@ void clearQueue(){
     taskQueue->DeleteAllItems();
 }
 
+// Set Scheduler, Update Description and Set Graph Theme
 void selectScheduler(){
     int selected = schedulerList->GetFirstSelected();
         switch(selected){
             case 0:
                 selectedScheduler = FIFO_SCHEDULER;
                 schedulerDesc->SetValue(FIFO_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x91, 0x91, 0x91));
-                graph->SetColourTheme(wxColour(0xEE,0xEE,0xEE), *wxBLACK, *wxBLACK);
+                simuPage->SetBackgroundColour(wxColour(0xA6, 0x60, 0x02));
+                graph->SetColourTheme(wxColour(0xF1,0xE6,0xD8), *wxBLACK, *wxBLACK);
                 break;
             case 1:
                 selectedScheduler = SJF_SCHEDULER;
@@ -75,14 +79,14 @@ void selectScheduler(){
             case 4:
                 selectedScheduler = RRB_SCHEDULER;
                 schedulerDesc->SetValue(RRB_DESC);
-                simuPage->SetBackgroundColour(*wxBLACK);
-                graph->SetColourTheme(*wxBLACK, *wxWHITE, *wxWHITE);
+                simuPage->SetBackgroundColour(wxColour(0x38, 0x00, 0x4D));
+                graph->SetColourTheme(wxColour(0xE0,0xD8,0xE3), *wxWHITE, *wxWHITE);
                 break;
             case 5:
                 selectedScheduler = DR_SCHEDULER;
                 schedulerDesc->SetValue(DR_DESC);
-                simuPage->SetBackgroundColour(wxColour(0x55, 0x55, 0x50));
-                graph->SetColourTheme(wxColour(0x44, 0x44, 0x40), *wxLIGHT_GREY, *wxLIGHT_GREY);
+                simuPage->SetBackgroundColour(wxColour(0x1F, 0x1F, 0x1F));
+                graph->SetColourTheme(wxColour(0xD9, 0xD9, 0xD9), *wxLIGHT_GREY, *wxLIGHT_GREY);
                 break;
             case 6:
                 selectedScheduler = SWQ_SCHEDULER;
@@ -93,6 +97,7 @@ void selectScheduler(){
         }
 }
 
+// Start Simulation
 void startSimulation(){
     if(jobs.size() == 0){
         return;
@@ -134,6 +139,7 @@ void startSimulation(){
     simuThread.detach();
 }
 
+// Import Process Queue from File
 void importJobs(){
     wxFileDialog openFileDialog(nullptr, "Import Process Queue", "", "",
         "Scheduler Sim queue files (*.ssq)|*.ssq|All files (*.*)|*.*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -171,6 +177,7 @@ void importJobs(){
     wxMessageBox("Process queue imported successfully!", "Imported", wxICON_INFORMATION | wxOK);
 }
 
+// Export Process Queue to File
 void exportJobs(){
     wxFileDialog saveFileDialog(nullptr, "Export Process Queue", "", "",
         "Scheduler Sim queue files (*.ssq)|*.ssq", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -201,6 +208,7 @@ void exportJobs(){
     wxMessageBox("Process queue exported successfully!", "Exported", wxICON_INFORMATION | wxOK);
 }
 
+// Print Simulation Output
 void simuPrint(const wxString& text){
     if (wxTheApp){
         wxTheApp->CallAfter([text](){
@@ -210,6 +218,7 @@ void simuPrint(const wxString& text){
     }
 }
 
+// Update Graph with new data
 void updateGraph(){
     if (wxTheApp){
         wxTheApp->CallAfter([](){
@@ -219,6 +228,7 @@ void updateGraph(){
     }
 }
 
+// Export Graph as PNG
 void exportGraph(){
     wxFileDialog saveFileDialog(nullptr, "Save Graph", "", "",
         "PNG files (*.png)|*.png|All files (*.*)|*.*", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);

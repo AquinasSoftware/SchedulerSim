@@ -44,7 +44,6 @@ bool GUI::OnInit()
 
     // Else, run the GUI
     windowFrame *frame = new windowFrame();
-    wxInitAllImageHandlers();
     frame->SetIcon(wxIcon("ss.xpm"));
     frame->Show(true);
     return true;
@@ -169,6 +168,7 @@ windowFrame::windowFrame()
     graph->SetColourTheme(wxColour(0xFF, 0xFF, 0xFF, 0xCC), *wxBLACK, *wxBLACK);
     simuSkeleton->Add((mpWindow*)graph, 1, wxALL | wxEXPAND, 10);
 
+// Simulation Output
     simuOutput = new wxTextCtrl(simuPage, wxID_ANY, "", wxDefaultPosition, wxSize(780, 200), wxTE_MULTILINE | wxTE_READONLY);   
     simuOutput->SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     simuOutput->SetMargins(10, 5);

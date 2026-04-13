@@ -17,6 +17,7 @@ void SWQ(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -39,19 +40,28 @@ void SWQ(std::list<process*> &jobs){
     simuPrint("Running " + std::to_string(numJobs) + " with SWQ Scheduling\n");
     std::list<process*> readyQueue;
     std::list<process*> ioQueue;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::list<process*> window;
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
-    while(jobs.size() > 0 || readyQueue.size() > 0){
-        totalCycles++;
-        while(readyQueue.size() < 3 && jobs.size() > 0){
-            readyQueue.push_back(jobs.front());
-            jobs.pop_front();
+    std::cout << "Running " << (int)numJobs << " jobs with SWQ Scheduling" << std::endl;
+    simuPrint("Running " + std::to_string((int)numJobs) + " jobs with SWQ Scheduling\n");
+    time_t startTime = time(nullptr);
+    while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
+        while(window.size() < WINDOW_SIZE){
+            if (jobs.size() > 0){
+                window.push_back(jobs.front());
+                jobs.pop_front();
+            }
+            else{
+                break;
+            }
         }
-
-        if (readyQueue.size() > 0){
-            if (!(readyQueue.front()->isResponded())){
-                respTimes[readyQueue.front()->getID()] = readyQueue.front()->respond();
-                respSum += respTimes[readyQueue.front()->getID()];
+        if(window.size() > 0){
+            if (!(window.front()->isResponded())){
+                std::cout << window.front()->getID() << ": Started" << std::endl;
+                simuPrint("Process " + std::to_string(window.front()->getID()) + ": Started\n");
+                respTimes[window.front()->getID()] = window.front()->respond();
+                respSum += respTimes[window.front()->getID()];
                 respCounter++;
                 respLine->AddData((float)(respCounter / numJobs) * 100, (respSum / (respCounter)), true);
             }
@@ -69,20 +79,22 @@ void SWQ(std::list<process*> &jobs){
                     turnSum += turnTimes[readyQueue.front()->getID()];
                     turnCounter++;
                     turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
-                    std::cout << readyQueue.front()->getID() << ": Done" << std::endl;
-                    simuPrint("Process " + std::to_string(readyQueue.front()->getID()) + ": Done\n");
-                    delete(readyQueue.front());
+                    std::cout << window.front()->getID() << ": Done" << std::endl;
+                    simuPrint("Process " + std::to_string(window.front()->getID()) + ": Done\n");
+                    delete window.front();
+                    window.pop_front();
+                    break;
+                default:
+                    window.push_back(window.front());
+                    window.pop_front();
                     break;
             }
-            readyQueue.pop_front();
         }
         std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);

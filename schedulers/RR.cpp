@@ -2,6 +2,16 @@
 #include <chrono>
 #include "schedulers.h"
 
+/* 
+RR - Round Robin
+Processes are put in a rotating queue and given a fixed time slice 
+to run. If a process doesn't finish within its time slice, it's 
+moved to the back of the queue. This approach is simple and fair, 
+but can lead to longer turnaround times for short processes if the
+time slice is too large, or increased overhead if the time slice is 
+too small.
+*/
+
 void roundRobin(std::list<process*> &jobs){
     float numJobs = jobs.size();
     double respTimes[(short)numJobs] = {0};
@@ -10,6 +20,7 @@ void roundRobin(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -30,7 +41,7 @@ void roundRobin(std::list<process*> &jobs){
     std::cout << "Running " << numJobs << " with Round Robin Scheduling" << std::endl;
     simuPrint("Running " + std::to_string(numJobs) + " with Round Robin Scheduling\n");
     std::list<process*> ioQueue;
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
     while(jobs.size() > 0){
         totalCycles++;
@@ -39,6 +50,8 @@ void roundRobin(std::list<process*> &jobs){
             jobs.pop_front();
         }
         if (!(jobs.front()->isResponded())){
+            std::cout << jobs.front()->getID() << ": Started" << std::endl;
+                simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Started\n");
             respTimes[jobs.front()->getID()] = jobs.front()->respond();
             respSum += respTimes[jobs.front()->getID()];
             respCounter++;
@@ -46,9 +59,8 @@ void roundRobin(std::list<process*> &jobs){
         }
         switch (jobs.front()->run()){
             case RUNNING:
+                std::this_thread::sleep_for(TIME_SLICE);
                 jobs.push_back(jobs.front());
-                std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
                 break;
             case BLOCKED:
                 ioQueue.push_back(jobs.front());
@@ -64,13 +76,12 @@ void roundRobin(std::list<process*> &jobs){
                 break;
         }
         jobs.pop_front();
-        std::this_thread::sleep_for(TIME_SLICE);
         updateGraph();
     }
 
     auto end = std::chrono::high_resolution_clock::now();
     auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);

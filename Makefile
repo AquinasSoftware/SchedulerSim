@@ -43,7 +43,8 @@ win64:
 		TARGET=SchedulerSim.exe
 	mkdir dist
 	mv SchedulerSim.exe dist/
-	cp dependencies/wxWidgets-win64/bin/*.dll dist/
+	cp dependencies/wxWidgets-win64/bin/wxbase32u_gcc_custom.dll dist/
+	cp dependencies/wxWidgets-win64/bin/wxmsw32u_core_gcc_custom.dll dist/
 	cp /usr/lib/gcc/x86_64-w64-mingw32/*/libgcc_s_seh-1.dll dist/ || true
 	cp /usr/lib/gcc/x86_64-w64-mingw32/*/libstdc++-6.dll dist/ || true
 	cp /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll dist/ || true

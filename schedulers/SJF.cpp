@@ -2,6 +2,17 @@
 #include <chrono>
 #include "schedulers.h"
 
+/*
+ SJF - Shortest Job First
+ Processes are scheduled based on the shortest remaining time first.
+ This approach minimizes the average waiting time but can lead to 
+ starvation of longer processes. This is the theorietical best
+ scheduler for minimizing average waiting time, but it is not 
+ commonly used in practice due to the difficulty of accurately 
+ predicting process run times and the potential for starvation 
+ of longer processes.
+*/
+
 void SJF(std::list<process*> &jobs){
     float numJobs = jobs.size();
     std::cout << "Running " << numJobs << " with Round SJF Scheduling" << std::endl;
@@ -12,6 +23,7 @@ void SJF(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
     respLine->SetPen(*wxRED);
@@ -31,7 +43,7 @@ void SJF(std::list<process*> &jobs){
 
     std::list<process*> ioQueue;
     jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
-    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs));
+    std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
     running.detach();
     time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0){
@@ -39,6 +51,8 @@ void SJF(std::list<process*> &jobs){
         short sizeMonitor = jobs.size();
         if (sizeMonitor > 0){
             if (!(jobs.front()->isResponded())){
+                std::cout << jobs.front()->getID() << ": Started" << std::endl;
+                    simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Started\n");
                 respTimes[jobs.front()->getID()] = jobs.front()->respond();
                 respSum += respTimes[jobs.front()->getID()];
                 respCounter++;
@@ -59,14 +73,12 @@ void SJF(std::list<process*> &jobs){
                     delete jobs.front();
                     jobs.pop_front();
                     break;
-                default:
-                    std::cout << jobs.front()->getID() << ": Running" << std::endl;
-                    simuPrint("Process " + std::to_string(jobs.front()->getID()) + ": Running\n");
+                default:       
+                    std::this_thread::sleep_for(TIME_SLICE);
                     break;
             }
             updateGraph();
         }
-        std::this_thread::sleep_for(TIME_SLICE);
         if (sizeMonitor < jobs.size()){
             jobs.sort([](process* a, process* b){ return a->timeLeft() < b->timeLeft(); });
         }
@@ -74,7 +86,7 @@ void SJF(std::list<process*> &jobs){
 
     auto end = std::chrono::high_resolution_clock::now();
     auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-
+    *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);
