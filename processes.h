@@ -14,6 +14,9 @@ hits 0, it IO request count will be decreased. When both
 counters reach 0, the process is finished and the
 deconstructor function is called.
 ********************************************/
+#ifndef PROCESS_H
+#define PROCESS_H
+
 #include <map>
 #include <chrono>
 
@@ -54,13 +57,14 @@ class process{
         short runTime;
         short ioCount;
         status currentStatus;
-        time_t startTime = 0;
-        time_t respTime = 0;
-        time_t turnTime = 0;
+        std::chrono::steady_clock::time_point startTime;
+        double respTime = -1.0;
+        double turnTime = -1.0;
 
     public:
         process(procName type, short procID);
 
+        void start();
         short getID();
         void setID(short newID);
         const char* getType();
@@ -74,3 +78,5 @@ class process{
         bool isResponded();
         double turnaround();
 };
+
+#endif

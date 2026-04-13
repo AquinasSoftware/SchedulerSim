@@ -1,17 +1,18 @@
+#include <iomanip>
+#include <chrono>
 #include "schedulers.h"
-#define WINDOW_SIZE 3
-
 
 /*************************************
  SWQ - Smart Window Queue
-    Creates a window of size X and runs
-    each process within in round robin fashion.
+    Processes are put in a linear queue in the order they were received. 
+    The first 3 are then executed in a rotation until one is complete or 
+    issues an I/O instruction. 
 *************************************/
-
 void SWQ(std::list<process*> &jobs){
+    //Setup
     float numJobs = jobs.size();
-    double respTimes[(short)numJobs];
-    double turnTimes[(short)numJobs];
+    double respTimes[(short)numJobs] = {0};
+    double turnTimes[(short)numJobs] = {0};
     short respCounter = 0;
     short turnCounter = 0;
     float respSum = 0;
@@ -30,6 +31,14 @@ void SWQ(std::list<process*> &jobs){
     graph->AddLayer(respLine);
     graph->AddLayer(turnLine);
     graph->Fit();
+
+    long long totalCycles = 0;
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // Simulation
+    std::cout << "Running " << numJobs << " with Smart Window Queue Scheduling" << std::endl;
+    simuPrint("Running " + std::to_string(numJobs) + " with SWQ Scheduling\n");
+    std::list<process*> readyQueue;
     std::list<process*> ioQueue;
     std::list<process*> window;
     std::thread running(ioCall, std::ref(ioQueue), std::ref(jobs), doneFlag);
@@ -56,14 +65,18 @@ void SWQ(std::list<process*> &jobs){
                 respCounter++;
                 respLine->AddData((float)(respCounter / numJobs) * 100, (respSum / (respCounter)), true);
             }
-            switch (window.front()->run()){
+            switch (readyQueue.front()->run()){
+                case RUNNING:
+                    readyQueue.push_back(readyQueue.front());
+                    std::cout << readyQueue.front()->getID() << ": Running" << std::endl;
+                    simuPrint("Process " + std::to_string(readyQueue.front()->getID()) + ": Running\n");
+                    break;
                 case BLOCKED:
-                    ioQueue.push_back(window.front());
-                    window.pop_front();
+                    ioQueue.push_back(readyQueue.front());
                     break;
                 case DONE:
-                    turnTimes[window.front()->getID()] = window.front()->turnaround();
-                    turnSum += turnTimes[window.front()->getID()];
+                    turnTimes[readyQueue.front()->getID()] = readyQueue.front()->turnaround();
+                    turnSum += turnTimes[readyQueue.front()->getID()];
                     turnCounter++;
                     turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
                     std::cout << window.front()->getID() << ": Done" << std::endl;
@@ -84,8 +97,11 @@ void SWQ(std::list<process*> &jobs){
     *doneFlag = true;
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
-    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " seconds\n\tAvg Turnaround Time: " << avgTurn << " seconds" << std::endl;
-    simuPrint("Completed all jobs\n\tAvg Response Time: " + std::to_string(avgResp) + " seconds\n\tAvg Turnaround Time: " + std::to_string(avgTurn) + " seconds\n");
+    std::cout << std::fixed << std::setprecision(3);
+    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
+    simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
+    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();
