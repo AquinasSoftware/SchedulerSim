@@ -2,6 +2,7 @@
 #include <chrono>
 #include "schedulers.h"
 
+#define WINDOW_SIZE 3
 /*************************************
  SWQ - Smart Window Queue
     Processes are put in a linear queue in the order they were received. 
@@ -17,6 +18,7 @@ void SWQ(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    float totalTime = 0;
     bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
@@ -36,8 +38,8 @@ void SWQ(std::list<process*> &jobs){
     auto start = std::chrono::high_resolution_clock::now();
 
     // Simulation
-    std::cout << "Running " << numJobs << " with Smart Window Queue Scheduling" << std::endl;
-    simuPrint("Running " + std::to_string(numJobs) + " with SWQ Scheduling\n");
+    std::cout << "Running " << (int)numJobs << " with Smart Window Queue Scheduling" << std::endl;
+    simuPrint("Running " + std::to_string((int)numJobs) + " with SWQ Scheduling\n");
     std::list<process*> readyQueue;
     std::list<process*> ioQueue;
     std::list<process*> window;
@@ -45,7 +47,6 @@ void SWQ(std::list<process*> &jobs){
     running.detach();
     std::cout << "Running " << (int)numJobs << " jobs with SWQ Scheduling" << std::endl;
     simuPrint("Running " + std::to_string((int)numJobs) + " jobs with SWQ Scheduling\n");
-    time_t startTime = time(nullptr);
     while(jobs.size() > 0 || ioQueue.size() > 0 || window.size() > 0){
         while(window.size() < WINDOW_SIZE){
             if (jobs.size() > 0){
@@ -78,6 +79,7 @@ void SWQ(std::list<process*> &jobs){
                     turnTimes[readyQueue.front()->getID()] = readyQueue.front()->turnaround();
                     turnSum += turnTimes[readyQueue.front()->getID()];
                     turnCounter++;
+                    totalTime = turnTimes[readyQueue.front()->getID()];
                     turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
                     std::cout << window.front()->getID() << ": Done" << std::endl;
                     simuPrint("Process " + std::to_string(window.front()->getID()) + ": Done\n");
@@ -98,10 +100,8 @@ void SWQ(std::list<process*> &jobs){
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-    std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
-    simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
-    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
+    std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();

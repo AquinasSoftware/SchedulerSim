@@ -28,6 +28,7 @@ void RedRobinRestaurant(std::list<process*> &jobs){
   short turnCounter = 0;
   float respSum = 0;
   float turnSum = 0;
+  float totalTime = 0;
   mpFXYVector* respLine = new mpFXYVector("Response Time");
   mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
   respLine->SetPen(*wxRED);
@@ -43,10 +44,9 @@ void RedRobinRestaurant(std::list<process*> &jobs){
   graph->Fit();
 
   long long totalCycles = 0;
-  auto start = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Running " << numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
-  simuPrint("Running " + std::to_string(numjobs) + " with Red Robin (Restaurant) Scheduling\n");
+  std::cout << "Running " << (int)numjobs << " with Red Robin (Restaurant) Scheduling" << std::endl;
+  simuPrint("Running " + std::to_string((int)numjobs) + " with Red Robin (Restaurant) Scheduling\n");
   time_t starttime = time(nullptr);
 
   const int maxCycles = 2;
@@ -79,6 +79,7 @@ void RedRobinRestaurant(std::list<process*> &jobs){
      case DONE:
         turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
         turnSum += turnTimes[jobs.front()->getID()];
+        totalTime = turnTimes[jobs.front()->getID()];
         turnCounter++;
         turnLine->AddData(((float)(turnCounter) / numjobs) * 100, (turnSum / (turnCounter)), true);
         std::cout << "Completed Job " << jobs.front()->getID() << "" << std::endl;
@@ -103,16 +104,13 @@ void RedRobinRestaurant(std::list<process*> &jobs){
     
   }
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-
     double avgResp = std::accumulate(respTimes, respTimes + (short)numjobs, 0.0) / numjobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numjobs, 0.0) / numjobs;
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-    std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
-    simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
-    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
+    std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    std::cout << "Total Cycles: " << totalCycles << std::endl;
+    simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+    simuPrint("Total Cycles: " + std::to_string(totalCycles));
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();
@@ -129,6 +127,7 @@ void RedRobinBatman(std::list<process*> &jobs){
   short turnCounter = 0;
   float respSum = 0;
   float turnSum = 0;
+  float totalTime = 0;
   bool *doneFlag = new bool(false);
 
   mpFXYVector* respLine = new mpFXYVector("Response Time");
@@ -146,10 +145,9 @@ void RedRobinBatman(std::list<process*> &jobs){
   graph->Fit();
 
   long long totalCycles = 0;
-  auto start = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Running " << numJobs << " with Red Robin (Batman) Scheduling" << std::endl;
-  simuPrint("Running " + std::to_string(numJobs) + " with Red Robin (Batman) Scheduling\n");
+  std::cout << "Running " << (int)numJobs << " with Red Robin (Batman) Scheduling" << std::endl;
+  simuPrint("Running " + std::to_string((int)numJobs) + " with Red Robin (Batman) Scheduling\n");
 
   std::list<process*> goons;
   std::list<process*> bosses;
@@ -194,6 +192,7 @@ void RedRobinBatman(std::list<process*> &jobs){
         turnTimes[current->getID()] = current->turnaround();
         turnSum += turnTimes[current->getID()];
         turnCounter++;
+        totalTime = turnTimes[current->getID()];
         turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
         std::cout << current->getID() << ": Done (Goon)" << std::endl;
         simuPrint("Process " + std::to_string(current->getID()) + ": Done (Goon)\n");
@@ -258,6 +257,7 @@ void RedRobinBatman(std::list<process*> &jobs){
           turnTimes[current->getID()] = current->turnaround();
           turnSum += turnTimes[current->getID()];
           turnCounter++;
+          totalTime = turnTimes[current->getID()];
           turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
           std::cout << current->getID() << ": Done (Boss)" << std::endl;
           simuPrint("Process " + std::to_string(current->getID()) + ": Done (Boss)\n");
@@ -270,16 +270,14 @@ void RedRobinBatman(std::list<process*> &jobs){
     }
   }
 
-  auto end = std::chrono::high_resolution_clock::now();
-  auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
   *doneFlag = true;
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << std::fixed << std::setprecision(3);
-  std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-  std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
-  simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
-  simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
+  std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+  std::cout << "Total Cycles: " << totalCycles << std::endl;
+  simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+  simuPrint("Total Cycles: " + std::to_string(totalCycles));
   
   clearQueue();
   setupPage->Enable();
@@ -297,6 +295,7 @@ void DeadRobin(std::list<process*> &jobs){
   short turnCounter = 0;
   float respSum = 0;
   float turnSum = 0;
+  float totalTime = 0;
   bool *doneFlag = new bool(false);
 
   mpFXYVector* respLine = new mpFXYVector("Response Time");
@@ -314,10 +313,9 @@ void DeadRobin(std::list<process*> &jobs){
   graph->Fit();
 
   long long totalCycles = 0;
-  auto start = std::chrono::high_resolution_clock::now();
 
-  std::cout << "Running " << numJobs << " with Dead Robin Scheduling" << std::endl;
-  simuPrint("Running " + std::to_string(numJobs) + " with Dead Robin Scheduling\n");
+  std::cout << "Running " << (int)numJobs << " with Dead Robin Scheduling" << std::endl;
+  simuPrint("Running " + std::to_string((int)numJobs) + " with Dead Robin Scheduling\n");
 
   std::list<process*> goons;
   std::list<process*> bosses;
@@ -362,6 +360,7 @@ void DeadRobin(std::list<process*> &jobs){
         turnTimes[current->getID()] = current->turnaround();
         turnSum += turnTimes[current->getID()];
         turnCounter++;
+        totalTime = turnTimes[current->getID()];
         turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
         std::cout << current->getID() << ": Done (Boss)" << std::endl;
         simuPrint("Process " + std::to_string(current->getID()) + ": Done (Boss)\n");
@@ -425,6 +424,7 @@ void DeadRobin(std::list<process*> &jobs){
           turnTimes[current->getID()] = current->turnaround();
           turnSum += turnTimes[current->getID()];
           turnCounter++;
+          totalTime = turnTimes[current->getID()];
           turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
           std::cout << current->getID() << ": Done (Goon)" << std::endl;
           simuPrint("Process " + std::to_string(current->getID()) + ": Done (Goon)\n");
@@ -437,16 +437,14 @@ void DeadRobin(std::list<process*> &jobs){
     }
   }
 
-  auto end = std::chrono::high_resolution_clock::now();
-  auto totalTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
   *doneFlag = true;
   double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
   double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
   std::cout << std::fixed << std::setprecision(3);
-  std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-  std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
-  simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
-  simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
+  std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+  std::cout << "Total Cycles: " << totalCycles << std::endl;
+  simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+  simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\n");
   
   clearQueue();
   setupPage->Enable();

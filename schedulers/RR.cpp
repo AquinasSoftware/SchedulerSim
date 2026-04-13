@@ -20,6 +20,8 @@ void roundRobin(std::list<process*> &jobs){
     short turnCounter = 0;
     float respSum = 0;
     float turnSum = 0;
+    int totalCycles = 0;
+    float totalTime = 0;
     bool *doneFlag = new bool(false);
     mpFXYVector* respLine = new mpFXYVector("Response Time");
     mpFXYVector* turnLine = new mpFXYVector("Turnaround Time");
@@ -66,6 +68,7 @@ void roundRobin(std::list<process*> &jobs){
                 case DONE:
                     turnTimes[jobs.front()->getID()] = jobs.front()->turnaround();
                     turnSum += turnTimes[jobs.front()->getID()];
+                    totalTime = turnTimes[jobs.front()->getID()];
                     turnCounter++;
                     turnLine->AddData((float)(turnCounter / numJobs) * 100, (turnSum / (turnCounter)), true);
                     std::cout << jobs.front()->getID() << ": Done" << std::endl;
@@ -75,6 +78,7 @@ void roundRobin(std::list<process*> &jobs){
             }
             jobs.pop_front();
             updateGraph();
+            totalCycles++;
         }
         else{
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -85,10 +89,10 @@ void roundRobin(std::list<process*> &jobs){
     double avgResp = std::accumulate(respTimes, respTimes + (short)numJobs, 0.0) / numJobs;
     double avgTurn = std::accumulate(turnTimes, turnTimes + (short)numJobs, 0.0) / numJobs;
     std::cout << std::fixed << std::setprecision(3);
-    std::cout << "Completed all jobs\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
-    std::cout << "Total Cycles: " << totalCycles << "\nTotal Time: " << totalTime << " nanoseconds" << std::endl;
-    simuPrint(wxString::Format("Completed all jobs\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", avgResp, avgTurn));
-    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\nTotal Time: " + std::to_string(totalTime) + " nanoseconds\n");
+    std::cout << "Completed all jobs in " << totalTime << " nanoseconds\n\tAvg Response Time: " << avgResp << " nanoseconds\n\tAvg Turnaround Time: " << avgTurn << " nanoseconds" << std::endl;
+    std::cout << "Total Cycles: " << totalCycles << "\n" << std::endl;
+    simuPrint(wxString::Format("Completed all jobs in %.3f nanoseconds\n\tAvg Response Time: %.3f nanoseconds\n\tAvg Turnaround Time: %.3f nanoseconds\n", totalTime, avgResp, avgTurn));
+    simuPrint("Total Cycles: " + std::to_string(totalCycles) + "\n");
     clearQueue();
     setupPage->Enable();
     startBtn->Enable();

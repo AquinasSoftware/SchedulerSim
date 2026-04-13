@@ -6,13 +6,7 @@ process::process(procName type, short procID){
     runTime = params.at(type).dRunTime;
     ioCount = params.at(type).dIoCount;
     currentStatus = READY;
-    startTime = std::chrono::steady_clock::now();
-}
-
-void process::start(){
-    startTime = std::chrono::steady_clock::now();
-    respTime = -1.0;
-    turnTime = -1.0;
+    startTime = time(nullptr);
 }
 
 // Return Process ID
@@ -44,12 +38,6 @@ const char* process::getType(){
             return "Web Browser";
         case VIDEO_STREAMER:
             return "Video Streamer";
-        case AI_DESKTOP_ASSISTANT:
-            return "AI Desktop Assistant";
-        case ANTIVIRUS_SCANNER:
-            return "Antivirus Scanner";
-        case FILE_COMPRESSOR:
-            return "File Compressor";
         default:
             return "Unknown";
     }
@@ -95,21 +83,19 @@ void process::ioCall(){
 }
 
 double process::respond(){
-    if(respTime < 0){
-        auto now = std::chrono::steady_clock::now();
-        respTime = std::chrono::duration_cast<std::chrono::nanoseconds>(now - startTime).count();
+    if(respTime == 0){
+        respTime = difftime(time(nullptr), startTime);
     }
     return respTime;
 }
 
 bool process::isResponded(){
-    return respTime >= 0;
+    return respTime != 0;
 }
 
 double process::turnaround(){
-    if(turnTime < 0){
-        auto now = std::chrono::steady_clock::now();
-        turnTime = std::chrono::duration_cast<std::chrono::nanoseconds>(now - startTime).count();
+    if(turnTime == 0){
+        turnTime = difftime(time(nullptr), startTime);
     }
     return turnTime;
 }
