@@ -1,6 +1,8 @@
 # Scheduler Sim
 Scheduler Sim is an educational tool to showcase how various algorithms can be used by an operating system to complete a list of processes on a single-core CPU. It accepts a user-specified list of jobs, then graphs the average response and turnaround times as the queue is completed. These results can then be exported for comparison.
 
+It is built using wxWidgets, a cross-platform GUI library, as well as Davide Rondini's fork of wxMathPlot. This allows for an easy-to-use experience on both Windows and Linux machines.
+
 ## Included Algorithms
 The following standard scheduling algorithms are included:
 - FIFO (First In, First Out)
